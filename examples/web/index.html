@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+</head>
+<body>
+    <script src="../../dist/main.js"></script>
+    <script> 
+        function stringToArrayBuffer(str) {
+            const encoder = new TextEncoder();
+            const uint8Array = encoder.encode(str);
+            return uint8Array.buffer;
+        }       
+        function arrayBufferToString(buffer) {
+            const decoder = new TextDecoder();
+            return decoder.decode(buffer);
+        }
+
+        console.log(Chef.Executor.getOpCategories())
+        console.log(Chef.Executor.getOpConfigs())
+
+        let executor = new Chef.Executor("To Base64");
+        let encoded =  executor.run(stringToArrayBuffer("hello"), ["A-Za-z0-9+/="])   
+        console.log(encoded)
+
+        executor = new Chef.Executor("From Base64"); 
+        let plain =  executor.run(encoded.output, ["A-Za-z0-9+/="])   
+        console.log(plain)
+        
+        executor = new Chef.Executor("Compression", "Gzip",  null);       
+        let compressed = executor.run(stringToArrayBuffer("hello"), ["Dynamic Huffman Coding", "", "", false]);
+        console.log(compressed)
+        
+        executor = new Chef.Executor("Compression", "Gunzip",  null); 
+        plain = executor.run(compressed.output)
+        console.log(plain)
+        console.log(arrayBufferToString(plain.output)) //hello
+
+    </script>
+</body>
+
+</html>
