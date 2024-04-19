@@ -43,7 +43,7 @@ module.exports = function (grunt) {
             myconfig: () => ({
                 //mode: "production",
                 mode: "development",
-                
+               
                 entry: {
                     main: "./src/update/index.js"
                 },
@@ -51,7 +51,7 @@ module.exports = function (grunt) {
                     path: __dirname + "/dist",
                     filename: "[name].js",
                     library: {
-                        name: 'Chef',
+                        name: 'chef',
                         type: 'umd',
                         export: 'default',
                     },
@@ -68,19 +68,18 @@ module.exports = function (grunt) {
                         process: "process",
                         Buffer: ["buffer", "Buffer"]
                     }),
-                    new webpack.DefinePlugin({
-                        // Required by Jimp to improve loading speed in browsers
-                        "process.browser": "true"
+                    new webpack.DefinePlugin({                       
+                        //"process.browser": "true"
                     }),
                 ],
                 resolve: {
                     extensions: [".mjs", ".js", ".json"], // Allows importing files without extensions
 
                     fallback: {
-                        "fs": false,
-                        "child_process": false,
-                        "net": false,
-                        "tls": false,
+                        //"fs": false,
+                        //"child_process": false,
+                        //"net": false,
+                        //"tls": false,
                         //"process": false,
                         "path": require.resolve("path/"),
                         "buffer": require.resolve("buffer/"),
@@ -93,7 +92,7 @@ module.exports = function (grunt) {
                 },
                 module: {
                     // argon2-browser loads argon2.wasm by itself, so Webpack should not load it
-                    noParse: /argon2\.wasm$/,
+                    //noParse: /argon2\.wasm$/,
                     rules: [
                         {
                             test: /\.m?js$/,
@@ -106,6 +105,7 @@ module.exports = function (grunt) {
                             type: "javascript/auto",
                             loader: "babel-loader"
                         },
+                        /*
                         {
                             test: /node-forge/,
                             loader: "imports-loader",
@@ -113,12 +113,15 @@ module.exports = function (grunt) {
                                 additionalCode: "var jQuery = false;"
                             }
                         },
+                        */
+                       /*
                         {
                             // Load argon2.wasm as base64-encoded binary file expected by argon2-browser
                             test: /argon2\.wasm$/,
                             loader: "base64-loader",
                             type: "javascript/auto"
                         },
+                        */
                         {
                             test: /\.(ico|eot|ttf|woff|woff2)$/,
                             type: "asset/resource",
@@ -189,8 +192,8 @@ module.exports = function (grunt) {
                 command: chainCommands([
                     "echo '\n--- Regenerating config files. ---'",
                     "echo [] > src/core/config/OperationConfig.json",
-                    `node ${nodeFlags} src/core/config/scripts/generateOpsIndex.mjs`,
-                    `node ${nodeFlags} src/core/config/scripts/generateConfig.mjs`,
+                    `node ${nodeFlags} src/update/scripts/generateOpsIndex.mjs`,
+                    `node ${nodeFlags} src/update/scripts/generateConfig.mjs`,
                     "echo '--- Config scripts finished. ---\n'"
                 ]),
                 sync: true

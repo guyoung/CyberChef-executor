@@ -1,130 +1,124 @@
 
 
-import OpModules from "../core/config/modules/OpModules.mjs";
+import CiphersModule from "../core/config/modules/Ciphers.mjs";
+import DefaultModule from "../core/config/modules/Default.mjs";
+import EncodingsModule from "../core/config/modules/Encodings.mjs";
+import CryptoModule from "../core/config/modules/Crypto.mjs";
+import SerialiseModule from "../core/config/modules/Serialise.mjs";
+import HashingModule from "../core/config/modules/Hashing.mjs";
+import BletchleyModule from "../core/config/modules/Bletchley.mjs";
+import CodeModule from "../core/config/modules/Code.mjs";
+import DiffModule from "../core/config/modules/Diff.mjs";
+import ShellcodeModule from "../core/config/modules/Shellcode.mjs";
+import ChartsModule from "../core/config/modules/Charts.mjs";
+import RegexModule from "../core/config/modules/Regex.mjs";
+import ImageModule from "../core/config/modules/Image.mjs";
+import PGPModule from "../core/config/modules/PGP.mjs";
+import CompressionModule from "../core/config/modules/Compression.mjs";
+import PublicKeyModule from "../core/config/modules/PublicKey.mjs";
+import OCRModule from "../core/config/modules/OCR.mjs";
+import URLModule from "../core/config/modules/URL.mjs";
+import UserAgentModule from "../core/config/modules/UserAgent.mjs";
+import ProtobufModule from "../core/config/modules/Protobuf.mjs";
+
 import Categories from "../core/config/Categories.json" assert {type: "json"};
 import OperationConfig from "../core/config/OperationConfig.json" assert {type: "json"};
 
-function getOperation(module_name, op_name, args) {
-    let module = OpModules[module_name]
+const OpModules = {};
+
+Object.assign(
+    OpModules,
+    CiphersModule,
+    DefaultModule,
+    EncodingsModule,
+    CryptoModule,
+    SerialiseModule,
+    HashingModule,
+    BletchleyModule,
+    CodeModule,
+    DiffModule,
+    ShellcodeModule,
+    ChartsModule,
+    RegexModule,
+    ImageModule,
+    PGPModule,
+    CompressionModule,
+    PublicKeyModule,
+    OCRModule,
+    URLModule,
+    UserAgentModule,
+    ProtobufModule,
+);
+
+function getOperation(moduleName, opName) {
+    let module = OpModules[moduleName]
 
     if (!module) {
         return null
     }
 
-    let op = module[op_name];
+    let op = module[opName];
 
     if (!op) {
         return null
     }
-
-    if (args) {
-        op.args = args
-    }
-
     return op
 }
 
 class Executor {
 
     constructor() {
-        this.opList = []
-        if (arguments.length > 0) {
-            let module_name = "Default"
-            let op_name
-            let args
-
-            if (arguments.length == 1) {
-                op_name = arguments[0]
-            } else if (arguments.length == 2) {
-                op_name = arguments[0]
-                args = arguments[1]
-            } else {
-                module_name = arguments[0]
-                op_name = arguments[1]
-                args = arguments[2]
-            }
-
-            let op = getOperation(module_name, op_name, args)
-
-            if (!op) {
-                throw "Operation not exist"
-            }
-
-            this.opList = [op];
-        }
-
-    }
-
-
-
-
-    addOperation() {
         if (arguments.length == 0) {
             throw "Arguments error"
         }
 
-        let module_name = "Default"
-        let op_name
-        let args
+        let moduleName = "Default"
+        let opName
+
 
         if (arguments.length == 1) {
-            op_name = arguments[0]
-        } else if (arguments.length == 2) {
-            op_name = arguments[0]
-            args = arguments[1]
-        } else {
-            module_name = arguments[0]
-            op_name = arguments[1]
-            args = arguments[2]
+            opName = arguments[0]
+        } else if (arguments.length >= 2) {
+            moduleName = arguments[0]
+            opName = arguments[1]
         }
 
-        let op = getOperation(module_name, op_name, args)
+
+        let op = getOperation(moduleName, opName)
 
         if (!op) {
             throw "Operation not exist"
         }
 
-        this.opList.push(op);
+        this.op = new op();
     }
 
 
     run(input, args) {
-        if (this.opList.length >= 2) {
-            return runMulti(input)
-        }
-
-        if (this.opList.length == 0) {
+        if (!this.op) {
             throw "Operation not exist"
         }
 
-        let op = new this.opList[0]()
 
-        let output = op.run(input, args)
+        let output = this.op.run(input, args)
 
         return {
             output: output,
-            outputType: op.outputType
+            outputType: this.op.outputType
         }
-
-    }
-
-    runMulti(input) {
-
-    }
-
-    static getOpCategories() {
-        return Categories
-    }
-
-    static getOpConfigs() {
-        return OperationConfig
-    }
-
-    static getOpConfig(op_name) {
-        return OperationConfig[op_name]
     }
 }
 
+function getOpCategories() {
+    return Categories
+}
+
+function getOpConfigs() {
+    return OperationConfig
+}
+
 export default {
-    Executor: Executor
+    Executor: Executor,
+    getOpCategories: getOpCategories,
+    getOpConfigs: getOpConfigs
 }

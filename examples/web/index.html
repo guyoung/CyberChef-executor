@@ -17,26 +17,43 @@
             return decoder.decode(buffer);
         }
 
-        console.log(Chef.Executor.getOpCategories())
-        console.log(Chef.Executor.getOpConfigs())
+        console.log(chef.getOpCategories())
+        console.log(chef.getOpConfigs())
 
-        let executor = new Chef.Executor("To Base64");
+        let executor = new chef.Executor("To Base64");
         let encoded =  executor.run(stringToArrayBuffer("hello"), ["A-Za-z0-9+/="])   
         console.log(encoded)
 
-        executor = new Chef.Executor("From Base64"); 
+        executor = new chef.Executor("From Base64"); 
         let plain =  executor.run(encoded.output, ["A-Za-z0-9+/="])   
         console.log(plain)
         
-        executor = new Chef.Executor("Compression", "Gzip",  null);       
-        let compressed = executor.run(stringToArrayBuffer("hello"), ["Dynamic Huffman Coding", "", "", false]);
+        /*
+        executor = new chef.Executor("Compression", "Gzip");       
+        let compressed = executor.run(stringToArrayBuffer("hello"), [
+            "Dynamic Huffman Coding", "", "", false])
         console.log(compressed)
         
-        executor = new Chef.Executor("Compression", "Gunzip",  null); 
+        executor = new chef.Executor("Compression", "Gunzip")
         plain = executor.run(compressed.output)
         console.log(plain)
         console.log(arrayBufferToString(plain.output)) //hello
 
+        executor = new chef.Executor("Ciphers", "Blowfish Encrypt")
+        let encrypted =  executor.run("hello", [
+            {'option':'Hex','string':'12345678'},
+            {'option':'Hex','string':'1234567812345678'},
+            'CBC','Raw','Hex'])
+        console.log(encrypted)
+
+
+        executor = new chef.Executor("Ciphers", "Blowfish Decrypt")
+        plain =  executor.run(encrypted.output, [
+            {'option':'Hex','string':'12345678'},
+            {'option':'Hex','string':'1234567812345678'},
+            'CBC','Hex','Raw'])
+        console.log(plain)
+        */
     </script>
 </body>
 
