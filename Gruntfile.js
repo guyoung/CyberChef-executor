@@ -11,7 +11,10 @@ module.exports = function (grunt) {
     // Tasks
     grunt.registerTask("build",
         "A persistent task which creates a development build whenever source files are modified.",
-        ["clean:build", "clean:config", "copy:chi", "copy:crypto", "copy:zlibjs", "exec:generateConfig", "webpack"]);
+        ["clean:build", 
+        "clean:config",        
+        "exec:generateConfig", 
+        "webpack"]);
 
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-exec");
@@ -74,20 +77,33 @@ module.exports = function (grunt) {
                 ],
                 resolve: {
                     extensions: [".mjs", ".js", ".json"], // Allows importing files without extensions
+                    alias: {
+                        "zlibjs": path.resolve(__dirname,'node_modules/zlib-module-js'),
+                        "chi-squared": path.resolve(__dirname,'src/update/chi-squared'),
+                        "crypto-api": path.resolve(__dirname,'src/update/crypto-api'),
+                        "node-forge": path.resolve(__dirname,'src/update/node-forge'),
+                        "node-md6": path.resolve(__dirname,'src/update/node-md6'),
+                        "randombytes": path.resolve(__dirname,'src/update/randombytes'),
+                        "isomorphic-fetch": path.resolve(__dirname,'src/update/fetch-fit'),
 
+                    },
                     fallback: {
-                        //"fs": false,
-                        //"child_process": false,
-                        //"net": false,
-                        //"tls": false,
-                        //"process": false,
+                        "fs": false,
+                        "child_process": false,
+                        "net": false,
+                        "tls": false,            
+                       
+                        "process": require.resolve('process/browser'),
                         "path": require.resolve("path/"),
                         "buffer": require.resolve("buffer/"),
                         "assert": require.resolve("assert/"),
                         "crypto": require.resolve("crypto-browserify"),
                         "stream": require.resolve("stream-browserify"),
                         "zlib": require.resolve("browserify-zlib"),
-                        "vm": require.resolve("vm-browserify")                   
+                        "vm": require.resolve("vm-browserify"),
+
+                        "jimp": require.resolve("jimp/es"),
+                        "@jimp/plugin-print": false,                      
                     }
                 },
                 module: {

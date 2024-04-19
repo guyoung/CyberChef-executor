@@ -95,6 +95,7 @@
     "nwmatcher": "^1.4.4",
     "otp": "^1.1.2",
     "path": "^0.12.7",
+    "process": "^0.11.10",
     "protobufjs": "^7.2.6",
     "qr-image": "^3.2.0",
     "reflect-metadata": "^0.2.2",
@@ -112,6 +113,6 @@
     "vm-browserify": "^1.1.2",
     "xpath": "^0.0.34",
     "xregexp": "^5.1.1",
-    "zlib-module-js": "^0.3.1"
+    "zlib-module-js": "^0.3.2"
   }
 }

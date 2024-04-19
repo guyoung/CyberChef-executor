@@ -1,0 +1,26 @@
+{
+ 
+  "name": "fetch-fit",
+  "description": "fetch",
+  "version": "0.1.0",
+  "license": "MIT",
+  "main": "./index.js",
+  "author": {
+    "name": "guyoung"
+
+  },
+  "homepage": "https://github.com/guyoung/fetch-fit",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/guyoung/fetch-fit"
+  },
+  
+  "files": [
+    "index.js",
+    "README.md",  
+    "examples",
+    "LICENSE",
+    "package.json"
+  ]
+  
+}

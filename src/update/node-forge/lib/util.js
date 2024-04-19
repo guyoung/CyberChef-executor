@@ -12,13 +12,13 @@ var baseN = require('./baseN');
 var util = module.exports = forge.util = forge.util || {};
 
 // define setImmediate and nextTick
-(function() {
+(function () {
   // use native nextTick (unless we're in webpack)
   // webpack (or better node-libs-browser polyfill) sets process.browser.
   // this way we can detect webpack properly
-  if(typeof process !== 'undefined' && process.nextTick && !process.browser) {
+  if (typeof process !== 'undefined' && process.nextTick && !process.browser) {
     util.nextTick = process.nextTick;
-    if(typeof setImmediate === 'function') {
+    if (typeof setImmediate === 'function') {
       util.setImmediate = setImmediate;
     } else {
       // polyfill setImmediate with nextTick, older versions of node
@@ -29,9 +29,9 @@ var util = module.exports = forge.util = forge.util || {};
   }
 
   // polyfill nextTick with native setImmediate
-  if(typeof setImmediate === 'function') {
-    util.setImmediate = function() { return setImmediate.apply(undefined, arguments); };
-    util.nextTick = function(callback) {
+  if (typeof setImmediate === 'function') {
+    util.setImmediate = function () { return setImmediate.apply(undefined, arguments); };
+    util.nextTick = function (callback) {
       return setImmediate(callback);
     };
     return;
@@ -43,29 +43,29 @@ var util = module.exports = forge.util = forge.util || {};
   postMessage or setTimeout. */
 
   // polyfill with setTimeout
-  util.setImmediate = function(callback) {
+  util.setImmediate = function (callback) {
     setTimeout(callback, 0);
   };
 
   // upgrade polyfill to use postMessage
-  if(typeof window !== 'undefined' &&
+  if (typeof window !== 'undefined' &&
     typeof window.postMessage === 'function') {
     var msg = 'forge.setImmediate';
     var callbacks = [];
-    util.setImmediate = function(callback) {
+    util.setImmediate = function (callback) {
       callbacks.push(callback);
       // only send message when one hasn't been sent in
       // the current turn of the event loop
-      if(callbacks.length === 1) {
+      if (callbacks.length === 1) {
         window.postMessage(msg, '*');
       }
     };
     function handler(event) {
-      if(event.source === window && event.data === msg) {
+      if (event.source === window && event.data === msg) {
         event.stopPropagation();
         var copy = callbacks.slice();
         callbacks.length = 0;
-        copy.forEach(function(callback) {
+        copy.forEach(function (callback) {
           callback();
         });
       }
@@ -74,29 +74,29 @@ var util = module.exports = forge.util = forge.util || {};
   }
 
   // upgrade polyfill to use MutationObserver
-  if(typeof MutationObserver !== 'undefined') {
+  if (typeof MutationObserver !== 'undefined') {
     // polyfill with MutationObserver
     var now = Date.now();
     var attr = true;
     var div = document.createElement('div');
     var callbacks = [];
-    new MutationObserver(function() {
+    new MutationObserver(function () {
       var copy = callbacks.slice();
       callbacks.length = 0;
-      copy.forEach(function(callback) {
+      copy.forEach(function (callback) {
         callback();
       });
-    }).observe(div, {attributes: true});
+    }).observe(div, { attributes: true });
     var oldSetImmediate = util.setImmediate;
-    util.setImmediate = function(callback) {
-      if(Date.now() - now > 15) {
+    util.setImmediate = function (callback) {
+      if (Date.now() - now > 15) {
         now = Date.now();
         oldSetImmediate(callback);
       } else {
         callbacks.push(callback);
         // only trigger observer when it hasn't been triggered in
         // the current turn of the event loop
-        if(callbacks.length === 1) {
+        if (callbacks.length === 1) {
           div.setAttribute('a', attr = !attr);
         }
       }
@@ -107,16 +107,23 @@ var util = module.exports = forge.util = forge.util || {};
 })();
 
 // check if running under Node.js
+/***
 util.isNodejs =
-typeof module !== 'undefined' && module.exports
+  typeof process !== 'undefined' && process.versions && process.versions.node;
+***/
+
+/***{ modified by guyoung ***/
+util.isNodejs =
+  typeof module !== 'undefined' && module.exports
+/*** modified by guyoung }***/	
 
 
 // 'self' will also work in Web Workers (instance of WorkerGlobalScope) while
 // it will point to `window` in the main thread.
 // To remain compatible with older browsers, we fall back to 'window' if 'self'
 // is not available.
-util.globalScope = (function() {
-  if(util.isNodejs) {
+util.globalScope = (function () {
+  if (util.isNodejs) {
     return global;
   }
 
@@ -124,17 +131,17 @@ util.globalScope = (function() {
 })();
 
 // define isArray
-util.isArray = Array.isArray || function(x) {
+util.isArray = Array.isArray || function (x) {
   return Object.prototype.toString.call(x) === '[object Array]';
 };
 
 // define isArrayBuffer
-util.isArrayBuffer = function(x) {
+util.isArrayBuffer = function (x) {
   return typeof ArrayBuffer !== 'undefined' && x instanceof ArrayBuffer;
 };
 
 // define isArrayBufferView
-util.isArrayBufferView = function(x) {
+util.isArrayBufferView = function (x) {
   return x && util.isArrayBuffer(x.buffer) && x.byteLength !== undefined;
 };
 
@@ -148,7 +155,7 @@ util.isArrayBufferView = function(x) {
  * Throw Error if n invalid.
  */
 function _checkBitsParam(n) {
-  if(!(n === 8 || n === 16 || n === 24 || n === 32)) {
+  if (!(n === 8 || n === 16 || n === 24 || n === 32)) {
     throw new Error('Only 8, 16, 24, or 32 bits supported: ' + n);
   }
 }
@@ -172,10 +179,10 @@ function ByteStringBuffer(b) {
   // the pointer for reading from this buffer
   this.read = 0;
 
-  if(typeof b === 'string') {
+  if (typeof b === 'string') {
     this.data = b;
-  } else if(util.isArrayBuffer(b) || util.isArrayBufferView(b)) {
-    if(typeof Buffer !== 'undefined' && b instanceof Buffer) {
+  } else if (util.isArrayBuffer(b) || util.isArrayBufferView(b)) {
+    if (typeof Buffer !== 'undefined' && b instanceof Buffer) {
       this.data = b.toString('binary');
     } else {
       // convert native buffer to forge buffer
@@ -183,15 +190,15 @@ function ByteStringBuffer(b) {
       var arr = new Uint8Array(b);
       try {
         this.data = String.fromCharCode.apply(null, arr);
-      } catch(e) {
-        for(var i = 0; i < arr.length; ++i) {
+      } catch (e) {
+        for (var i = 0; i < arr.length; ++i) {
           this.putByte(arr[i]);
         }
       }
     }
-  } else if(b instanceof ByteStringBuffer ||
+  } else if (b instanceof ByteStringBuffer ||
     (typeof b === 'object' && typeof b.data === 'string' &&
-    typeof b.read === 'number')) {
+      typeof b.read === 'number')) {
     // copy existing buffer
     this.data = b.data;
     this.read = b.read;
@@ -213,9 +220,9 @@ util.ByteStringBuffer = ByteStringBuffer;
   these types of strings are periodically joined to reduce the memory
   footprint. */
 var _MAX_CONSTRUCTED_STRING_LENGTH = 4096;
-util.ByteStringBuffer.prototype._optimizeConstructedString = function(x) {
+util.ByteStringBuffer.prototype._optimizeConstructedString = function (x) {
   this._constructedStringLength += x;
-  if(this._constructedStringLength > _MAX_CONSTRUCTED_STRING_LENGTH) {
+  if (this._constructedStringLength > _MAX_CONSTRUCTED_STRING_LENGTH) {
     // this substr() should cause the constructed string to join
     this.data.substr(0, 1);
     this._constructedStringLength = 0;
@@ -227,7 +234,7 @@ util.ByteStringBuffer.prototype._optimizeConstructedString = function(x) {
  *
  * @return the number of bytes in this buffer.
  */
-util.ByteStringBuffer.prototype.length = function() {
+util.ByteStringBuffer.prototype.length = function () {
   return this.data.length - this.read;
 };
 
@@ -236,7 +243,7 @@ util.ByteStringBuffer.prototype.length = function() {
  *
  * @return true if this buffer is empty, false if not.
  */
-util.ByteStringBuffer.prototype.isEmpty = function() {
+util.ByteStringBuffer.prototype.isEmpty = function () {
   return this.length() <= 0;
 };
 
@@ -247,7 +254,7 @@ util.ByteStringBuffer.prototype.isEmpty = function() {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putByte = function(b) {
+util.ByteStringBuffer.prototype.putByte = function (b) {
   return this.putBytes(String.fromCharCode(b));
 };
 
@@ -259,15 +266,15 @@ util.ByteStringBuffer.prototype.putByte = function(b) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.fillWithByte = function(b, n) {
+util.ByteStringBuffer.prototype.fillWithByte = function (b, n) {
   b = String.fromCharCode(b);
   var d = this.data;
-  while(n > 0) {
-    if(n & 1) {
+  while (n > 0) {
+    if (n & 1) {
       d += b;
     }
     n >>>= 1;
-    if(n > 0) {
+    if (n > 0) {
       b += b;
     }
   }
@@ -283,7 +290,7 @@ util.ByteStringBuffer.prototype.fillWithByte = function(b, n) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putBytes = function(bytes) {
+util.ByteStringBuffer.prototype.putBytes = function (bytes) {
   this.data += bytes;
   this._optimizeConstructedString(bytes.length);
   return this;
@@ -296,7 +303,7 @@ util.ByteStringBuffer.prototype.putBytes = function(bytes) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putString = function(str) {
+util.ByteStringBuffer.prototype.putString = function (str) {
   return this.putBytes(util.encodeUtf8(str));
 };
 
@@ -307,7 +314,7 @@ util.ByteStringBuffer.prototype.putString = function(str) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt16 = function(i) {
+util.ByteStringBuffer.prototype.putInt16 = function (i) {
   return this.putBytes(
     String.fromCharCode(i >> 8 & 0xFF) +
     String.fromCharCode(i & 0xFF));
@@ -320,7 +327,7 @@ util.ByteStringBuffer.prototype.putInt16 = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt24 = function(i) {
+util.ByteStringBuffer.prototype.putInt24 = function (i) {
   return this.putBytes(
     String.fromCharCode(i >> 16 & 0xFF) +
     String.fromCharCode(i >> 8 & 0xFF) +
@@ -334,7 +341,7 @@ util.ByteStringBuffer.prototype.putInt24 = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt32 = function(i) {
+util.ByteStringBuffer.prototype.putInt32 = function (i) {
   return this.putBytes(
     String.fromCharCode(i >> 24 & 0xFF) +
     String.fromCharCode(i >> 16 & 0xFF) +
@@ -349,7 +356,7 @@ util.ByteStringBuffer.prototype.putInt32 = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt16Le = function(i) {
+util.ByteStringBuffer.prototype.putInt16Le = function (i) {
   return this.putBytes(
     String.fromCharCode(i & 0xFF) +
     String.fromCharCode(i >> 8 & 0xFF));
@@ -362,7 +369,7 @@ util.ByteStringBuffer.prototype.putInt16Le = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt24Le = function(i) {
+util.ByteStringBuffer.prototype.putInt24Le = function (i) {
   return this.putBytes(
     String.fromCharCode(i & 0xFF) +
     String.fromCharCode(i >> 8 & 0xFF) +
@@ -376,7 +383,7 @@ util.ByteStringBuffer.prototype.putInt24Le = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt32Le = function(i) {
+util.ByteStringBuffer.prototype.putInt32Le = function (i) {
   return this.putBytes(
     String.fromCharCode(i & 0xFF) +
     String.fromCharCode(i >> 8 & 0xFF) +
@@ -392,13 +399,13 @@ util.ByteStringBuffer.prototype.putInt32Le = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putInt = function(i, n) {
+util.ByteStringBuffer.prototype.putInt = function (i, n) {
   _checkBitsParam(n);
   var bytes = '';
   do {
     n -= 8;
     bytes += String.fromCharCode((i >> n) & 0xFF);
-  } while(n > 0);
+  } while (n > 0);
   return this.putBytes(bytes);
 };
 
@@ -411,9 +418,9 @@ util.ByteStringBuffer.prototype.putInt = function(i, n) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putSignedInt = function(i, n) {
+util.ByteStringBuffer.prototype.putSignedInt = function (i, n) {
   // putInt checks n
-  if(i < 0) {
+  if (i < 0) {
     i += 2 << (n - 1);
   }
   return this.putInt(i, n);
@@ -426,7 +433,7 @@ util.ByteStringBuffer.prototype.putSignedInt = function(i, n) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.putBuffer = function(buffer) {
+util.ByteStringBuffer.prototype.putBuffer = function (buffer) {
   return this.putBytes(buffer.getBytes());
 };
 
@@ -435,7 +442,7 @@ util.ByteStringBuffer.prototype.putBuffer = function(buffer) {
  *
  * @return the byte.
  */
-util.ByteStringBuffer.prototype.getByte = function() {
+util.ByteStringBuffer.prototype.getByte = function () {
   return this.data.charCodeAt(this.read++);
 };
 
@@ -445,7 +452,7 @@ util.ByteStringBuffer.prototype.getByte = function() {
  *
  * @return the uint16.
  */
-util.ByteStringBuffer.prototype.getInt16 = function() {
+util.ByteStringBuffer.prototype.getInt16 = function () {
   var rval = (
     this.data.charCodeAt(this.read) << 8 ^
     this.data.charCodeAt(this.read + 1));
@@ -459,7 +466,7 @@ util.ByteStringBuffer.prototype.getInt16 = function() {
  *
  * @return the uint24.
  */
-util.ByteStringBuffer.prototype.getInt24 = function() {
+util.ByteStringBuffer.prototype.getInt24 = function () {
   var rval = (
     this.data.charCodeAt(this.read) << 16 ^
     this.data.charCodeAt(this.read + 1) << 8 ^
@@ -474,7 +481,7 @@ util.ByteStringBuffer.prototype.getInt24 = function() {
  *
  * @return the word.
  */
-util.ByteStringBuffer.prototype.getInt32 = function() {
+util.ByteStringBuffer.prototype.getInt32 = function () {
   var rval = (
     this.data.charCodeAt(this.read) << 24 ^
     this.data.charCodeAt(this.read + 1) << 16 ^
@@ -490,7 +497,7 @@ util.ByteStringBuffer.prototype.getInt32 = function() {
  *
  * @return the uint16.
  */
-util.ByteStringBuffer.prototype.getInt16Le = function() {
+util.ByteStringBuffer.prototype.getInt16Le = function () {
   var rval = (
     this.data.charCodeAt(this.read) ^
     this.data.charCodeAt(this.read + 1) << 8);
@@ -504,7 +511,7 @@ util.ByteStringBuffer.prototype.getInt16Le = function() {
  *
  * @return the uint24.
  */
-util.ByteStringBuffer.prototype.getInt24Le = function() {
+util.ByteStringBuffer.prototype.getInt24Le = function () {
   var rval = (
     this.data.charCodeAt(this.read) ^
     this.data.charCodeAt(this.read + 1) << 8 ^
@@ -519,7 +526,7 @@ util.ByteStringBuffer.prototype.getInt24Le = function() {
  *
  * @return the word.
  */
-util.ByteStringBuffer.prototype.getInt32Le = function() {
+util.ByteStringBuffer.prototype.getInt32Le = function () {
   var rval = (
     this.data.charCodeAt(this.read) ^
     this.data.charCodeAt(this.read + 1) << 8 ^
@@ -537,14 +544,14 @@ util.ByteStringBuffer.prototype.getInt32Le = function() {
  *
  * @return the integer.
  */
-util.ByteStringBuffer.prototype.getInt = function(n) {
+util.ByteStringBuffer.prototype.getInt = function (n) {
   _checkBitsParam(n);
   var rval = 0;
   do {
     // TODO: Use (rval * 0x100) if adding support for 33 to 53 bits.
     rval = (rval << 8) + this.data.charCodeAt(this.read++);
     n -= 8;
-  } while(n > 0);
+  } while (n > 0);
   return rval;
 };
 
@@ -556,11 +563,11 @@ util.ByteStringBuffer.prototype.getInt = function(n) {
  *
  * @return the integer.
  */
-util.ByteStringBuffer.prototype.getSignedInt = function(n) {
+util.ByteStringBuffer.prototype.getSignedInt = function (n) {
   // getInt checks n
   var x = this.getInt(n);
   var max = 2 << (n - 2);
-  if(x >= max) {
+  if (x >= max) {
     x -= max << 1;
   }
   return x;
@@ -575,14 +582,14 @@ util.ByteStringBuffer.prototype.getSignedInt = function(n) {
  *
  * @return a binary encoded string of bytes.
  */
-util.ByteStringBuffer.prototype.getBytes = function(count) {
+util.ByteStringBuffer.prototype.getBytes = function (count) {
   var rval;
-  if(count) {
+  if (count) {
     // read count bytes
     count = Math.min(this.length(), count);
     rval = this.data.slice(this.read, this.read + count);
     this.read += count;
-  } else if(count === 0) {
+  } else if (count === 0) {
     rval = '';
   } else {
     // read all bytes, optimize to only copy when needed
@@ -600,8 +607,8 @@ util.ByteStringBuffer.prototype.getBytes = function(count) {
  *
  * @return a string full of binary encoded characters.
  */
-util.ByteStringBuffer.prototype.bytes = function(count) {
-  return (typeof(count) === 'undefined' ?
+util.ByteStringBuffer.prototype.bytes = function (count) {
+  return (typeof (count) === 'undefined' ?
     this.data.slice(this.read) :
     this.data.slice(this.read, this.read + count));
 };
@@ -613,7 +620,7 @@ util.ByteStringBuffer.prototype.bytes = function(count) {
  *
  * @return the byte.
  */
-util.ByteStringBuffer.prototype.at = function(i) {
+util.ByteStringBuffer.prototype.at = function (i) {
   return this.data.charCodeAt(this.read + i);
 };
 
@@ -625,7 +632,7 @@ util.ByteStringBuffer.prototype.at = function(i) {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.setAt = function(i, b) {
+util.ByteStringBuffer.prototype.setAt = function (i, b) {
   this.data = this.data.substr(0, this.read + i) +
     String.fromCharCode(b) +
     this.data.substr(this.read + i + 1);
@@ -637,7 +644,7 @@ util.ByteStringBuffer.prototype.setAt = function(i, b) {
  *
  * @return the last byte.
  */
-util.ByteStringBuffer.prototype.last = function() {
+util.ByteStringBuffer.prototype.last = function () {
   return this.data.charCodeAt(this.data.length - 1);
 };
 
@@ -646,7 +653,7 @@ util.ByteStringBuffer.prototype.last = function() {
  *
  * @return the copy.
  */
-util.ByteStringBuffer.prototype.copy = function() {
+util.ByteStringBuffer.prototype.copy = function () {
   var c = util.createBuffer(this.data);
   c.read = this.read;
   return c;
@@ -657,8 +664,8 @@ util.ByteStringBuffer.prototype.copy = function() {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.compact = function() {
-  if(this.read > 0) {
+util.ByteStringBuffer.prototype.compact = function () {
+  if (this.read > 0) {
     this.data = this.data.slice(this.read);
     this.read = 0;
   }
@@ -670,7 +677,7 @@ util.ByteStringBuffer.prototype.compact = function() {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.clear = function() {
+util.ByteStringBuffer.prototype.clear = function () {
   this.data = '';
   this.read = 0;
   return this;
@@ -683,7 +690,7 @@ util.ByteStringBuffer.prototype.clear = function() {
  *
  * @return this buffer.
  */
-util.ByteStringBuffer.prototype.truncate = function(count) {
+util.ByteStringBuffer.prototype.truncate = function (count) {
   var len = Math.max(0, this.length() - count);
   this.data = this.data.substr(this.read, len);
   this.read = 0;
@@ -695,11 +702,11 @@ util.ByteStringBuffer.prototype.truncate = function(count) {
  *
  * @return a hexadecimal string.
  */
-util.ByteStringBuffer.prototype.toHex = function() {
+util.ByteStringBuffer.prototype.toHex = function () {
   var rval = '';
-  for(var i = this.read; i < this.data.length; ++i) {
+  for (var i = this.read; i < this.data.length; ++i) {
     var b = this.data.charCodeAt(i);
-    if(b < 16) {
+    if (b < 16) {
       rval += '0';
     }
     rval += b.toString(16);
@@ -712,7 +719,7 @@ util.ByteStringBuffer.prototype.toHex = function() {
  *
  * @return a UTF-16 string.
  */
-util.ByteStringBuffer.prototype.toString = function() {
+util.ByteStringBuffer.prototype.toString = function () {
   return util.decodeUtf8(this.bytes());
 };
 
@@ -758,9 +765,9 @@ function DataBuffer(b, options) {
 
   var isArrayBuffer = util.isArrayBuffer(b);
   var isArrayBufferView = util.isArrayBufferView(b);
-  if(isArrayBuffer || isArrayBufferView) {
+  if (isArrayBuffer || isArrayBufferView) {
     // use ArrayBuffer directly
-    if(isArrayBuffer) {
+    if (isArrayBuffer) {
       this.data = new DataView(b);
     } else {
       // TODO: adjust read/write offset based on the type of view
@@ -777,11 +784,11 @@ function DataBuffer(b, options) {
   this.data = new DataView(new ArrayBuffer(0));
   this.write = 0;
 
-  if(b !== null && b !== undefined) {
+  if (b !== null && b !== undefined) {
     this.putBytes(b);
   }
 
-  if('writeOffset' in options) {
+  if ('writeOffset' in options) {
     this.write = options.writeOffset;
   }
 }
@@ -792,7 +799,7 @@ util.DataBuffer = DataBuffer;
  *
  * @return the number of bytes in this buffer.
  */
-util.DataBuffer.prototype.length = function() {
+util.DataBuffer.prototype.length = function () {
   return this.write - this.read;
 };
 
@@ -801,7 +808,7 @@ util.DataBuffer.prototype.length = function() {
  *
  * @return true if this buffer is empty, false if not.
  */
-util.DataBuffer.prototype.isEmpty = function() {
+util.DataBuffer.prototype.isEmpty = function () {
   return this.length() <= 0;
 };
 
@@ -816,8 +823,8 @@ util.DataBuffer.prototype.isEmpty = function() {
  * @param [growSize] the minimum amount, in bytes, to grow the buffer by if
  *          necessary.
  */
-util.DataBuffer.prototype.accommodate = function(amount, growSize) {
-  if(this.length() >= amount) {
+util.DataBuffer.prototype.accommodate = function (amount, growSize) {
+  if (this.length() >= amount) {
     return this;
   }
   growSize = Math.max(growSize || this.growSize, amount);
@@ -839,7 +846,7 @@ util.DataBuffer.prototype.accommodate = function(amount, growSize) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putByte = function(b) {
+util.DataBuffer.prototype.putByte = function (b) {
   this.accommodate(1);
   this.data.setUint8(this.write++, b);
   return this;
@@ -853,9 +860,9 @@ util.DataBuffer.prototype.putByte = function(b) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.fillWithByte = function(b, n) {
+util.DataBuffer.prototype.fillWithByte = function (b, n) {
   this.accommodate(n);
-  for(var i = 0; i < n; ++i) {
+  for (var i = 0; i < n; ++i) {
     this.data.setUint8(b);
   }
   return this;
@@ -871,8 +878,8 @@ util.DataBuffer.prototype.fillWithByte = function(b, n) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
-  if(util.isArrayBufferView(bytes)) {
+util.DataBuffer.prototype.putBytes = function (bytes, encoding) {
+  if (util.isArrayBufferView(bytes)) {
     var src = new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
     var len = src.byteLength - src.byteOffset;
     this.accommodate(len);
@@ -882,7 +889,7 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
     return this;
   }
 
-  if(util.isArrayBuffer(bytes)) {
+  if (util.isArrayBuffer(bytes)) {
     var src = new Uint8Array(bytes);
     this.accommodate(src.byteLength);
     var dst = new Uint8Array(this.data.buffer);
@@ -892,10 +899,10 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
   }
 
   // bytes is a util.DataBuffer or equivalent
-  if(bytes instanceof util.DataBuffer ||
+  if (bytes instanceof util.DataBuffer ||
     (typeof bytes === 'object' &&
-    typeof bytes.read === 'number' && typeof bytes.write === 'number' &&
-    util.isArrayBufferView(bytes.data))) {
+      typeof bytes.read === 'number' && typeof bytes.write === 'number' &&
+      util.isArrayBufferView(bytes.data))) {
     var src = new Uint8Array(bytes.data.byteLength, bytes.read, bytes.length());
     this.accommodate(src.byteLength);
     var dst = new Uint8Array(bytes.data.byteLength, this.write);
@@ -904,7 +911,7 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
     return this;
   }
 
-  if(bytes instanceof util.ByteStringBuffer) {
+  if (bytes instanceof util.ByteStringBuffer) {
     // copy binary string and process as the same as a string parameter below
     bytes = bytes.data;
     encoding = 'binary';
@@ -912,17 +919,17 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
 
   // string conversion
   encoding = encoding || 'binary';
-  if(typeof bytes === 'string') {
+  if (typeof bytes === 'string') {
     var view;
 
     // decode from string
-    if(encoding === 'hex') {
+    if (encoding === 'hex') {
       this.accommodate(Math.ceil(bytes.length / 2));
       view = new Uint8Array(this.data.buffer, this.write);
       this.write += util.binary.hex.decode(bytes, view, this.write);
       return this;
     }
-    if(encoding === 'base64') {
+    if (encoding === 'base64') {
       this.accommodate(Math.ceil(bytes.length / 4) * 3);
       view = new Uint8Array(this.data.buffer, this.write);
       this.write += util.binary.base64.decode(bytes, view, this.write);
@@ -930,14 +937,14 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
     }
 
     // encode text as UTF-8 bytes
-    if(encoding === 'utf8') {
+    if (encoding === 'utf8') {
       // encode as UTF-8 then decode string as raw binary
       bytes = util.encodeUtf8(bytes);
       encoding = 'binary';
     }
 
     // decode string as raw binary
-    if(encoding === 'binary' || encoding === 'raw') {
+    if (encoding === 'binary' || encoding === 'raw') {
       // one byte per character
       this.accommodate(bytes.length);
       view = new Uint8Array(this.data.buffer, this.write);
@@ -946,7 +953,7 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
     }
 
     // encode text as UTF-16 bytes
-    if(encoding === 'utf16') {
+    if (encoding === 'utf16') {
       // two bytes per character
       this.accommodate(bytes.length * 2);
       view = new Uint16Array(this.data.buffer, this.write);
@@ -967,7 +974,7 @@ util.DataBuffer.prototype.putBytes = function(bytes, encoding) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putBuffer = function(buffer) {
+util.DataBuffer.prototype.putBuffer = function (buffer) {
   this.putBytes(buffer);
   buffer.clear();
   return this;
@@ -981,7 +988,7 @@ util.DataBuffer.prototype.putBuffer = function(buffer) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putString = function(str) {
+util.DataBuffer.prototype.putString = function (str) {
   return this.putBytes(str, 'utf16');
 };
 
@@ -992,7 +999,7 @@ util.DataBuffer.prototype.putString = function(str) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt16 = function(i) {
+util.DataBuffer.prototype.putInt16 = function (i) {
   this.accommodate(2);
   this.data.setInt16(this.write, i);
   this.write += 2;
@@ -1006,7 +1013,7 @@ util.DataBuffer.prototype.putInt16 = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt24 = function(i) {
+util.DataBuffer.prototype.putInt24 = function (i) {
   this.accommodate(3);
   this.data.setInt16(this.write, i >> 8 & 0xFFFF);
   this.data.setInt8(this.write, i >> 16 & 0xFF);
@@ -1021,7 +1028,7 @@ util.DataBuffer.prototype.putInt24 = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt32 = function(i) {
+util.DataBuffer.prototype.putInt32 = function (i) {
   this.accommodate(4);
   this.data.setInt32(this.write, i);
   this.write += 4;
@@ -1035,7 +1042,7 @@ util.DataBuffer.prototype.putInt32 = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt16Le = function(i) {
+util.DataBuffer.prototype.putInt16Le = function (i) {
   this.accommodate(2);
   this.data.setInt16(this.write, i, true);
   this.write += 2;
@@ -1049,7 +1056,7 @@ util.DataBuffer.prototype.putInt16Le = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt24Le = function(i) {
+util.DataBuffer.prototype.putInt24Le = function (i) {
   this.accommodate(3);
   this.data.setInt8(this.write, i >> 16 & 0xFF);
   this.data.setInt16(this.write, i >> 8 & 0xFFFF, true);
@@ -1064,7 +1071,7 @@ util.DataBuffer.prototype.putInt24Le = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt32Le = function(i) {
+util.DataBuffer.prototype.putInt32Le = function (i) {
   this.accommodate(4);
   this.data.setInt32(this.write, i, true);
   this.write += 4;
@@ -1079,13 +1086,13 @@ util.DataBuffer.prototype.putInt32Le = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putInt = function(i, n) {
+util.DataBuffer.prototype.putInt = function (i, n) {
   _checkBitsParam(n);
   this.accommodate(n / 8);
   do {
     n -= 8;
     this.data.setInt8(this.write++, (i >> n) & 0xFF);
-  } while(n > 0);
+  } while (n > 0);
   return this;
 };
 
@@ -1098,10 +1105,10 @@ util.DataBuffer.prototype.putInt = function(i, n) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.putSignedInt = function(i, n) {
+util.DataBuffer.prototype.putSignedInt = function (i, n) {
   _checkBitsParam(n);
   this.accommodate(n / 8);
-  if(i < 0) {
+  if (i < 0) {
     i += 2 << (n - 1);
   }
   return this.putInt(i, n);
@@ -1112,7 +1119,7 @@ util.DataBuffer.prototype.putSignedInt = function(i, n) {
  *
  * @return the byte.
  */
-util.DataBuffer.prototype.getByte = function() {
+util.DataBuffer.prototype.getByte = function () {
   return this.data.getInt8(this.read++);
 };
 
@@ -1122,7 +1129,7 @@ util.DataBuffer.prototype.getByte = function() {
  *
  * @return the uint16.
  */
-util.DataBuffer.prototype.getInt16 = function() {
+util.DataBuffer.prototype.getInt16 = function () {
   var rval = this.data.getInt16(this.read);
   this.read += 2;
   return rval;
@@ -1134,7 +1141,7 @@ util.DataBuffer.prototype.getInt16 = function() {
  *
  * @return the uint24.
  */
-util.DataBuffer.prototype.getInt24 = function() {
+util.DataBuffer.prototype.getInt24 = function () {
   var rval = (
     this.data.getInt16(this.read) << 8 ^
     this.data.getInt8(this.read + 2));
@@ -1148,7 +1155,7 @@ util.DataBuffer.prototype.getInt24 = function() {
  *
  * @return the word.
  */
-util.DataBuffer.prototype.getInt32 = function() {
+util.DataBuffer.prototype.getInt32 = function () {
   var rval = this.data.getInt32(this.read);
   this.read += 4;
   return rval;
@@ -1160,7 +1167,7 @@ util.DataBuffer.prototype.getInt32 = function() {
  *
  * @return the uint16.
  */
-util.DataBuffer.prototype.getInt16Le = function() {
+util.DataBuffer.prototype.getInt16Le = function () {
   var rval = this.data.getInt16(this.read, true);
   this.read += 2;
   return rval;
@@ -1172,7 +1179,7 @@ util.DataBuffer.prototype.getInt16Le = function() {
  *
  * @return the uint24.
  */
-util.DataBuffer.prototype.getInt24Le = function() {
+util.DataBuffer.prototype.getInt24Le = function () {
   var rval = (
     this.data.getInt8(this.read) ^
     this.data.getInt16(this.read + 1, true) << 8);
@@ -1186,7 +1193,7 @@ util.DataBuffer.prototype.getInt24Le = function() {
  *
  * @return the word.
  */
-util.DataBuffer.prototype.getInt32Le = function() {
+util.DataBuffer.prototype.getInt32Le = function () {
   var rval = this.data.getInt32(this.read, true);
   this.read += 4;
   return rval;
@@ -1200,14 +1207,14 @@ util.DataBuffer.prototype.getInt32Le = function() {
  *
  * @return the integer.
  */
-util.DataBuffer.prototype.getInt = function(n) {
+util.DataBuffer.prototype.getInt = function (n) {
   _checkBitsParam(n);
   var rval = 0;
   do {
     // TODO: Use (rval * 0x100) if adding support for 33 to 53 bits.
     rval = (rval << 8) + this.data.getInt8(this.read++);
     n -= 8;
-  } while(n > 0);
+  } while (n > 0);
   return rval;
 };
 
@@ -1219,11 +1226,11 @@ util.DataBuffer.prototype.getInt = function(n) {
  *
  * @return the integer.
  */
-util.DataBuffer.prototype.getSignedInt = function(n) {
+util.DataBuffer.prototype.getSignedInt = function (n) {
   // getInt checks n
   var x = this.getInt(n);
   var max = 2 << (n - 2);
-  if(x >= max) {
+  if (x >= max) {
     x -= max << 1;
   }
   return x;
@@ -1237,17 +1244,17 @@ util.DataBuffer.prototype.getSignedInt = function(n) {
  *
  * @return a binary encoded string of bytes.
  */
-util.DataBuffer.prototype.getBytes = function(count) {
+util.DataBuffer.prototype.getBytes = function (count) {
   // TODO: deprecate this method, it is poorly named and
   // this.toString('binary') replaces it
   // add a toTypedArray()/toArrayBuffer() function
   var rval;
-  if(count) {
+  if (count) {
     // read count bytes
     count = Math.min(this.length(), count);
     rval = this.data.slice(this.read, this.read + count);
     this.read += count;
-  } else if(count === 0) {
+  } else if (count === 0) {
     rval = '';
   } else {
     // read all bytes, optimize to only copy when needed
@@ -1265,9 +1272,9 @@ util.DataBuffer.prototype.getBytes = function(count) {
  *
  * @return a string full of binary encoded characters.
  */
-util.DataBuffer.prototype.bytes = function(count) {
+util.DataBuffer.prototype.bytes = function (count) {
   // TODO: deprecate this method, it is poorly named, add "getString()"
-  return (typeof(count) === 'undefined' ?
+  return (typeof (count) === 'undefined' ?
     this.data.slice(this.read) :
     this.data.slice(this.read, this.read + count));
 };
@@ -1279,7 +1286,7 @@ util.DataBuffer.prototype.bytes = function(count) {
  *
  * @return the byte.
  */
-util.DataBuffer.prototype.at = function(i) {
+util.DataBuffer.prototype.at = function (i) {
   return this.data.getUint8(this.read + i);
 };
 
@@ -1291,7 +1298,7 @@ util.DataBuffer.prototype.at = function(i) {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.setAt = function(i, b) {
+util.DataBuffer.prototype.setAt = function (i, b) {
   this.data.setUint8(i, b);
   return this;
 };
@@ -1301,7 +1308,7 @@ util.DataBuffer.prototype.setAt = function(i, b) {
  *
  * @return the last byte.
  */
-util.DataBuffer.prototype.last = function() {
+util.DataBuffer.prototype.last = function () {
   return this.data.getUint8(this.write - 1);
 };
 
@@ -1310,7 +1317,7 @@ util.DataBuffer.prototype.last = function() {
  *
  * @return the copy.
  */
-util.DataBuffer.prototype.copy = function() {
+util.DataBuffer.prototype.copy = function () {
   return new util.DataBuffer(this);
 };
 
@@ -1319,8 +1326,8 @@ util.DataBuffer.prototype.copy = function() {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.compact = function() {
-  if(this.read > 0) {
+util.DataBuffer.prototype.compact = function () {
+  if (this.read > 0) {
     var src = new Uint8Array(this.data.buffer, this.read);
     var dst = new Uint8Array(src.byteLength);
     dst.set(src);
@@ -1336,7 +1343,7 @@ util.DataBuffer.prototype.compact = function() {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.clear = function() {
+util.DataBuffer.prototype.clear = function () {
   this.data = new DataView(new ArrayBuffer(0));
   this.read = this.write = 0;
   return this;
@@ -1349,7 +1356,7 @@ util.DataBuffer.prototype.clear = function() {
  *
  * @return this buffer.
  */
-util.DataBuffer.prototype.truncate = function(count) {
+util.DataBuffer.prototype.truncate = function (count) {
   this.write = Math.max(0, this.length() - count);
   this.read = Math.min(this.read, this.write);
   return this;
@@ -1360,11 +1367,11 @@ util.DataBuffer.prototype.truncate = function(count) {
  *
  * @return a hexadecimal string.
  */
-util.DataBuffer.prototype.toHex = function() {
+util.DataBuffer.prototype.toHex = function () {
   var rval = '';
-  for(var i = this.read; i < this.data.byteLength; ++i) {
+  for (var i = this.read; i < this.data.byteLength; ++i) {
     var b = this.data.getUint8(i);
-    if(b < 16) {
+    if (b < 16) {
       rval += '0';
     }
     rval += b.toString(16);
@@ -1381,26 +1388,26 @@ util.DataBuffer.prototype.toHex = function() {
  *
  * @return a string representation of the bytes in this buffer.
  */
-util.DataBuffer.prototype.toString = function(encoding) {
+util.DataBuffer.prototype.toString = function (encoding) {
   var view = new Uint8Array(this.data, this.read, this.length());
   encoding = encoding || 'utf8';
 
   // encode to string
-  if(encoding === 'binary' || encoding === 'raw') {
+  if (encoding === 'binary' || encoding === 'raw') {
     return util.binary.raw.encode(view);
   }
-  if(encoding === 'hex') {
+  if (encoding === 'hex') {
     return util.binary.hex.encode(view);
   }
-  if(encoding === 'base64') {
+  if (encoding === 'base64') {
     return util.binary.base64.encode(view);
   }
 
   // decode to text
-  if(encoding === 'utf8') {
+  if (encoding === 'utf8') {
     return util.text.utf8.decode(view);
   }
-  if(encoding === 'utf16') {
+  if (encoding === 'utf16') {
     return util.text.utf16.decode(view);
   }
 
@@ -1419,10 +1426,10 @@ util.DataBuffer.prototype.toString = function(encoding) {
  * @param [input] a string with encoded bytes to store in the buffer.
  * @param [encoding] (default: 'raw', other: 'utf8').
  */
-util.createBuffer = function(input, encoding) {
+util.createBuffer = function (input, encoding) {
   // TODO: deprecate, use new ByteBuffer() instead
   encoding = encoding || 'raw';
-  if(input !== undefined && encoding === 'utf8') {
+  if (input !== undefined && encoding === 'utf8') {
     input = util.encodeUtf8(input);
   }
   return new util.ByteBuffer(input);
@@ -1438,14 +1445,14 @@ util.createBuffer = function(input, encoding) {
  *
  * @return the filled string.
  */
-util.fillString = function(c, n) {
+util.fillString = function (c, n) {
   var s = '';
-  while(n > 0) {
-    if(n & 1) {
+  while (n > 0) {
+    if (n & 1) {
       s += c;
     }
     n >>>= 1;
-    if(n > 0) {
+    if (n > 0) {
       c += c;
     }
   }
@@ -1462,15 +1469,15 @@ util.fillString = function(c, n) {
  *
  * @return the XOR'd result.
  */
-util.xorBytes = function(s1, s2, n) {
+util.xorBytes = function (s1, s2, n) {
   var s3 = '';
   var b = '';
   var t = '';
   var i = 0;
   var c = 0;
-  for(; n > 0; --n, ++i) {
+  for (; n > 0; --n, ++i) {
     b = s1.charCodeAt(i) ^ s2.charCodeAt(i);
-    if(c >= 10) {
+    if (c >= 10) {
       s3 += t;
       t = '';
       c = 0;
@@ -1489,17 +1496,17 @@ util.xorBytes = function(s1, s2, n) {
  *
  * @return the binary-encoded string of bytes.
  */
-util.hexToBytes = function(hex) {
+util.hexToBytes = function (hex) {
   // TODO: deprecate: "Deprecated. Use util.binary.hex.decode instead."
   var rval = '';
   var i = 0;
-  if(hex.length & 1 == 1) {
+  if (hex.length & 1 == 1) {
     // odd number of characters, convert first character alone
     i = 1;
     rval += String.fromCharCode(parseInt(hex[0], 16));
   }
   // convert 2 characters (1 byte) at a time
-  for(; i < hex.length; i += 2) {
+  for (; i < hex.length; i += 2) {
     rval += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
   }
   return rval;
@@ -1512,7 +1519,7 @@ util.hexToBytes = function(hex) {
  *
  * @return the string of hexadecimal characters.
  */
-util.bytesToHex = function(bytes) {
+util.bytesToHex = function (bytes) {
   // TODO: deprecate: "Deprecated. Use util.binary.hex.encode instead."
   return util.createBuffer(bytes).toHex();
 };
@@ -1524,7 +1531,7 @@ util.bytesToHex = function(bytes) {
  *
  * @return the byte string.
  */
-util.int32ToBytes = function(i) {
+util.int32ToBytes = function (i) {
   return (
     String.fromCharCode(i >> 24 & 0xFF) +
     String.fromCharCode(i >> 16 & 0xFF) +
@@ -1536,33 +1543,33 @@ util.int32ToBytes = function(i) {
 var _base64 =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
 var _base64Idx = [
-/*43 -43 = 0*/
-/*'+',  1,  2,  3,'/' */
-   62, -1, -1, -1, 63,
+  /*43 -43 = 0*/
+  /*'+',  1,  2,  3,'/' */
+  62, -1, -1, -1, 63,
 
-/*'0','1','2','3','4','5','6','7','8','9' */
-   52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
+  /*'0','1','2','3','4','5','6','7','8','9' */
+  52, 53, 54, 55, 56, 57, 58, 59, 60, 61,
 
-/*15, 16, 17,'=', 19, 20, 21 */
+  /*15, 16, 17,'=', 19, 20, 21 */
   -1, -1, -1, 64, -1, -1, -1,
 
-/*65 - 43 = 22*/
-/*'A','B','C','D','E','F','G','H','I','J','K','L','M', */
-   0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12,
+  /*65 - 43 = 22*/
+  /*'A','B','C','D','E','F','G','H','I','J','K','L','M', */
+  0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
 
-/*'N','O','P','Q','R','S','T','U','V','W','X','Y','Z' */
-   13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+  /*'N','O','P','Q','R','S','T','U','V','W','X','Y','Z' */
+  13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
 
-/*91 - 43 = 48 */
-/*48, 49, 50, 51, 52, 53 */
+  /*91 - 43 = 48 */
+  /*48, 49, 50, 51, 52, 53 */
   -1, -1, -1, -1, -1, -1,
 
-/*97 - 43 = 54*/
-/*'a','b','c','d','e','f','g','h','i','j','k','l','m' */
-   26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
+  /*97 - 43 = 54*/
+  /*'a','b','c','d','e','f','g','h','i','j','k','l','m' */
+  26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
 
-/*'n','o','p','q','r','s','t','u','v','w','x','y','z' */
-   39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
+  /*'n','o','p','q','r','s','t','u','v','w','x','y','z' */
+  39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51
 ];
 
 // base58 characters (Bitcoin alphabet)
@@ -1577,13 +1584,13 @@ var _base58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
  *
  * @return the base64-encoded output.
  */
-util.encode64 = function(input, maxline) {
+util.encode64 = function (input, maxline) {
   // TODO: deprecate: "Deprecated. Use util.binary.base64.encode instead."
   var line = '';
   var output = '';
   var chr1, chr2, chr3;
   var i = 0;
-  while(i < input.length) {
+  while (i < input.length) {
     chr1 = input.charCodeAt(i++);
     chr2 = input.charCodeAt(i++);
     chr3 = input.charCodeAt(i++);
@@ -1591,14 +1598,14 @@ util.encode64 = function(input, maxline) {
     // encode 4 character group
     line += _base64.charAt(chr1 >> 2);
     line += _base64.charAt(((chr1 & 3) << 4) | (chr2 >> 4));
-    if(isNaN(chr2)) {
+    if (isNaN(chr2)) {
       line += '==';
     } else {
       line += _base64.charAt(((chr2 & 15) << 2) | (chr3 >> 6));
       line += isNaN(chr3) ? '=' : _base64.charAt(chr3 & 63);
     }
 
-    if(maxline && line.length > maxline) {
+    if (maxline && line.length > maxline) {
       output += line.substr(0, maxline) + '\r\n';
       line = line.substr(maxline);
     }
@@ -1614,7 +1621,7 @@ util.encode64 = function(input, maxline) {
  *
  * @return the binary encoded string.
  */
-util.decode64 = function(input) {
+util.decode64 = function (input) {
   // TODO: deprecate: "Deprecated. Use util.binary.base64.decode instead."
 
   // remove all non-base64 characters
@@ -1624,17 +1631,17 @@ util.decode64 = function(input) {
   var enc1, enc2, enc3, enc4;
   var i = 0;
 
-  while(i < input.length) {
+  while (i < input.length) {
     enc1 = _base64Idx[input.charCodeAt(i++) - 43];
     enc2 = _base64Idx[input.charCodeAt(i++) - 43];
     enc3 = _base64Idx[input.charCodeAt(i++) - 43];
     enc4 = _base64Idx[input.charCodeAt(i++) - 43];
 
     output += String.fromCharCode((enc1 << 2) | (enc2 >> 4));
-    if(enc3 !== 64) {
+    if (enc3 !== 64) {
       // decoded at least 2 bytes
       output += String.fromCharCode(((enc2 & 15) << 4) | (enc3 >> 2));
-      if(enc4 !== 64) {
+      if (enc4 !== 64) {
         // decoded 3 bytes
         output += String.fromCharCode(((enc3 & 3) << 6) | enc4);
       }
@@ -1654,7 +1661,7 @@ util.decode64 = function(input) {
  *
  * @return the binary encoded string.
  */
-util.encodeUtf8 = function(str) {
+util.encodeUtf8 = function (str) {
   return unescape(encodeURIComponent(str));
 };
 
@@ -1667,7 +1674,7 @@ util.encodeUtf8 = function(str) {
  *
  * @return the resulting standard string of characters.
  */
-util.decodeUtf8 = function(str) {
+util.decodeUtf8 = function (str) {
   return decodeURIComponent(escape(str));
 };
 
@@ -1678,7 +1685,7 @@ util.binary = {
   hex: {},
   base64: {},
   base58: {},
-  baseN : {
+  baseN: {
     encode: baseN.encode,
     decode: baseN.decode
   }
@@ -1692,7 +1699,7 @@ util.binary = {
  *
  * @return the binary-encoded string.
  */
-util.binary.raw.encode = function(bytes) {
+util.binary.raw.encode = function (bytes) {
   return String.fromCharCode.apply(null, bytes);
 };
 
@@ -1707,14 +1714,14 @@ util.binary.raw.encode = function(bytes) {
  *
  * @return the Uint8Array or the number of bytes written if output was given.
  */
-util.binary.raw.decode = function(str, output, offset) {
+util.binary.raw.decode = function (str, output, offset) {
   var out = output;
-  if(!out) {
+  if (!out) {
     out = new Uint8Array(str.length);
   }
   offset = offset || 0;
   var j = offset;
-  for(var i = 0; i < str.length; ++i) {
+  for (var i = 0; i < str.length; ++i) {
     out[j++] = str.charCodeAt(i);
   }
   return output ? (j - offset) : out;
@@ -1740,20 +1747,20 @@ util.binary.hex.encode = util.bytesToHex;
  *
  * @return the Uint8Array or the number of bytes written if output was given.
  */
-util.binary.hex.decode = function(hex, output, offset) {
+util.binary.hex.decode = function (hex, output, offset) {
   var out = output;
-  if(!out) {
+  if (!out) {
     out = new Uint8Array(Math.ceil(hex.length / 2));
   }
   offset = offset || 0;
   var i = 0, j = offset;
-  if(hex.length & 1) {
+  if (hex.length & 1) {
     // odd number of characters, convert first character alone
     i = 1;
     out[j++] = parseInt(hex[0], 16);
   }
   // convert 2 characters (1 byte) at a time
-  for(; i < hex.length; i += 2) {
+  for (; i < hex.length; i += 2) {
     out[j++] = parseInt(hex.substr(i, 2), 16);
   }
   return output ? (j - offset) : out;
@@ -1768,12 +1775,12 @@ util.binary.hex.decode = function(hex, output, offset) {
  *
  * @return the base64-encoded output string.
  */
-util.binary.base64.encode = function(input, maxline) {
+util.binary.base64.encode = function (input, maxline) {
   var line = '';
   var output = '';
   var chr1, chr2, chr3;
   var i = 0;
-  while(i < input.byteLength) {
+  while (i < input.byteLength) {
     chr1 = input[i++];
     chr2 = input[i++];
     chr3 = input[i++];
@@ -1781,14 +1788,14 @@ util.binary.base64.encode = function(input, maxline) {
     // encode 4 character group
     line += _base64.charAt(chr1 >> 2);
     line += _base64.charAt(((chr1 & 3) << 4) | (chr2 >> 4));
-    if(isNaN(chr2)) {
+    if (isNaN(chr2)) {
       line += '==';
     } else {
       line += _base64.charAt(((chr2 & 15) << 2) | (chr3 >> 6));
       line += isNaN(chr3) ? '=' : _base64.charAt(chr3 & 63);
     }
 
-    if(maxline && line.length > maxline) {
+    if (maxline && line.length > maxline) {
       output += line.substr(0, maxline) + '\r\n';
       line = line.substr(maxline);
     }
@@ -1807,9 +1814,9 @@ util.binary.base64.encode = function(input, maxline) {
  *
  * @return the Uint8Array or the number of bytes written if output was given.
  */
-util.binary.base64.decode = function(input, output, offset) {
+util.binary.base64.decode = function (input, output, offset) {
   var out = output;
-  if(!out) {
+  if (!out) {
     out = new Uint8Array(Math.ceil(input.length / 4) * 3);
   }
 
@@ -1820,17 +1827,17 @@ util.binary.base64.decode = function(input, output, offset) {
   var enc1, enc2, enc3, enc4;
   var i = 0, j = offset;
 
-  while(i < input.length) {
+  while (i < input.length) {
     enc1 = _base64Idx[input.charCodeAt(i++) - 43];
     enc2 = _base64Idx[input.charCodeAt(i++) - 43];
     enc3 = _base64Idx[input.charCodeAt(i++) - 43];
     enc4 = _base64Idx[input.charCodeAt(i++) - 43];
 
     out[j++] = (enc1 << 2) | (enc2 >> 4);
-    if(enc3 !== 64) {
+    if (enc3 !== 64) {
       // decoded at least 2 bytes
       out[j++] = ((enc2 & 15) << 4) | (enc3 >> 2);
-      if(enc4 !== 64) {
+      if (enc4 !== 64) {
         // decoded 3 bytes
         out[j++] = ((enc3 & 3) << 6) | enc4;
       }
@@ -1842,10 +1849,10 @@ util.binary.base64.decode = function(input, output, offset) {
 };
 
 // add support for base58 encoding/decoding with Bitcoin alphabet
-util.binary.base58.encode = function(input, maxline) {
+util.binary.base58.encode = function (input, maxline) {
   return util.binary.baseN.encode(input, _base58, maxline);
 };
-util.binary.base58.decode = function(input, maxline) {
+util.binary.base58.decode = function (input, maxline) {
   return util.binary.baseN.decode(input, _base58, maxline);
 };
 
@@ -1866,15 +1873,15 @@ util.text = {
  *
  * @return the Uint8Array or the number of bytes written if output was given.
  */
-util.text.utf8.encode = function(str, output, offset) {
+util.text.utf8.encode = function (str, output, offset) {
   str = util.encodeUtf8(str);
   var out = output;
-  if(!out) {
+  if (!out) {
     out = new Uint8Array(str.length);
   }
   offset = offset || 0;
   var j = offset;
-  for(var i = 0; i < str.length; ++i) {
+  for (var i = 0; i < str.length; ++i) {
     out[j++] = str.charCodeAt(i);
   }
   return output ? (j - offset) : out;
@@ -1887,7 +1894,7 @@ util.text.utf8.encode = function(str, output, offset) {
  *
  * @return the resulting string.
  */
-util.text.utf8.decode = function(bytes) {
+util.text.utf8.decode = function (bytes) {
   return util.decodeUtf8(String.fromCharCode.apply(null, bytes));
 };
 
@@ -1901,16 +1908,16 @@ util.text.utf8.decode = function(bytes) {
  *
  * @return the Uint8Array or the number of bytes written if output was given.
  */
-util.text.utf16.encode = function(str, output, offset) {
+util.text.utf16.encode = function (str, output, offset) {
   var out = output;
-  if(!out) {
+  if (!out) {
     out = new Uint8Array(str.length * 2);
   }
   var view = new Uint16Array(out.buffer);
   offset = offset || 0;
   var j = offset;
   var k = offset;
-  for(var i = 0; i < str.length; ++i) {
+  for (var i = 0; i < str.length; ++i) {
     view[k++] = str.charCodeAt(i);
     j += 2;
   }
@@ -1924,7 +1931,7 @@ util.text.utf16.encode = function(str, output, offset) {
  *
  * @return the resulting string.
  */
-util.text.utf16.decode = function(bytes) {
+util.text.utf16.decode = function (bytes) {
   return String.fromCharCode.apply(null, new Uint16Array(bytes.buffer));
 };
 
@@ -1938,17 +1945,17 @@ util.text.utf16.decode = function(bytes) {
  *
  * @return the deflated data as a string.
  */
-util.deflate = function(api, bytes, raw) {
+util.deflate = function (api, bytes, raw) {
   bytes = util.decode64(api.deflate(util.encode64(bytes)).rval);
 
   // strip zlib header and trailer if necessary
-  if(raw) {
+  if (raw) {
     // zlib header is 2 bytes (CMF,FLG) where FLG indicates that
     // there is a 4-byte DICT (alder-32) block before the data if
     // its 5th bit is set
     var start = 2;
     var flg = bytes.charCodeAt(1);
-    if(flg & 0x20) {
+    if (flg & 0x20) {
       start = 6;
     }
     // zlib trailer is 4 bytes of adler-32
@@ -1968,7 +1975,7 @@ util.deflate = function(api, bytes, raw) {
  *
  * @return the inflated data as a string, null on error.
  */
-util.inflate = function(api, bytes, raw) {
+util.inflate = function (api, bytes, raw) {
   // TODO: add zlib header and trailer if necessary/possible
   var rval = api.inflate(util.encode64(bytes)).rval;
   return (rval === null) ? null : util.decode64(rval);
@@ -1981,13 +1988,13 @@ util.inflate = function(api, bytes, raw) {
  * @param id the storage ID to use.
  * @param obj the storage object, null to remove.
  */
-var _setStorageObject = function(api, id, obj) {
-  if(!api) {
+var _setStorageObject = function (api, id, obj) {
+  if (!api) {
     throw new Error('WebStorage not available.');
   }
 
   var rval;
-  if(obj === null) {
+  if (obj === null) {
     rval = api.removeItem(id);
   } else {
     // json-encode and base64-encode object
@@ -1996,7 +2003,7 @@ var _setStorageObject = function(api, id, obj) {
   }
 
   // handle potential flash error
-  if(typeof(rval) !== 'undefined' && rval.rval !== true) {
+  if (typeof (rval) !== 'undefined' && rval.rval !== true) {
     var error = new Error(rval.error.message);
     error.id = rval.error.id;
     error.name = rval.error.name;
@@ -2012,8 +2019,8 @@ var _setStorageObject = function(api, id, obj) {
  *
  * @return the storage object entry or null if none exists.
  */
-var _getStorageObject = function(api, id) {
-  if(!api) {
+var _getStorageObject = function (api, id) {
+  if (!api) {
     throw new Error('WebStorage not available.');
   }
 
@@ -2026,9 +2033,9 @@ var _getStorageObject = function(api, id) {
     better solution in the future. */
 
   // flash returns item wrapped in an object, handle special case
-  if(api.init) {
-    if(rval.rval === null) {
-      if(rval.error) {
+  if (api.init) {
+    if (rval.rval === null) {
+      if (rval.error) {
         var error = new Error(rval.error.message);
         error.id = rval.error.id;
         error.name = rval.error.name;
@@ -2042,7 +2049,7 @@ var _getStorageObject = function(api, id) {
   }
 
   // handle decoding
-  if(rval !== null) {
+  if (rval !== null) {
     // base64-decode and json-decode data
     rval = JSON.parse(util.decode64(rval));
   }
@@ -2058,10 +2065,10 @@ var _getStorageObject = function(api, id) {
  * @param key the key for the item.
  * @param data the data for the item (any javascript object/primitive).
  */
-var _setItem = function(api, id, key, data) {
+var _setItem = function (api, id, key, data) {
   // get storage object
   var obj = _getStorageObject(api, id);
-  if(obj === null) {
+  if (obj === null) {
     // create a new storage object
     obj = {};
   }
@@ -2081,10 +2088,10 @@ var _setItem = function(api, id, key, data) {
  *
  * @return the item.
  */
-var _getItem = function(api, id, key) {
+var _getItem = function (api, id, key) {
   // get storage object
   var rval = _getStorageObject(api, id);
-  if(rval !== null) {
+  if (rval !== null) {
     // return data at key
     rval = (key in rval) ? rval[key] : null;
   }
@@ -2099,20 +2106,20 @@ var _getItem = function(api, id, key) {
  * @param id the storage ID to use.
  * @param key the key for the item.
  */
-var _removeItem = function(api, id, key) {
+var _removeItem = function (api, id, key) {
   // get storage object
   var obj = _getStorageObject(api, id);
-  if(obj !== null && key in obj) {
+  if (obj !== null && key in obj) {
     // remove key
     delete obj[key];
 
     // see if entry has no keys remaining
     var empty = true;
-    for(var prop in obj) {
+    for (var prop in obj) {
       empty = false;
       break;
     }
-    if(empty) {
+    if (empty) {
       // remove entry entirely if no keys are left
       obj = null;
     }
@@ -2128,7 +2135,7 @@ var _removeItem = function(api, id, key) {
  * @param api the storage interface.
  * @param id the storage ID to use.
  */
-var _clearItems = function(api, id) {
+var _clearItems = function (api, id) {
   _setStorageObject(api, id, null);
 };
 
@@ -2141,11 +2148,11 @@ var _clearItems = function(api, id) {
  *
  * @return the return value from the function.
  */
-var _callStorageFunction = function(func, args, location) {
+var _callStorageFunction = function (func, args, location) {
   var rval = null;
 
   // default storage types
-  if(typeof(location) === 'undefined') {
+  if (typeof (location) === 'undefined') {
     location = ['web', 'flash'];
   }
 
@@ -2153,30 +2160,30 @@ var _callStorageFunction = function(func, args, location) {
   var type;
   var done = false;
   var exception = null;
-  for(var idx in location) {
+  for (var idx in location) {
     type = location[idx];
     try {
-      if(type === 'flash' || type === 'both') {
-        if(args[0] === null) {
+      if (type === 'flash' || type === 'both') {
+        if (args[0] === null) {
           throw new Error('Flash local storage not available.');
         }
         rval = func.apply(this, args);
         done = (type === 'flash');
       }
-      if(type === 'web' || type === 'both') {
+      if (type === 'web' || type === 'both') {
         args[0] = localStorage;
         rval = func.apply(this, args);
         done = true;
       }
-    } catch(ex) {
+    } catch (ex) {
       exception = ex;
     }
-    if(done) {
+    if (done) {
       break;
     }
   }
 
-  if(!done) {
+  if (!done) {
     throw exception;
   }
 
@@ -2211,7 +2218,7 @@ var _callStorageFunction = function(func, args, location) {
  * @param data the data for the item (any javascript object/primitive).
  * @param location an array with the preferred types of storage to use.
  */
-util.setItem = function(api, id, key, data, location) {
+util.setItem = function (api, id, key, data, location) {
   _callStorageFunction(_setItem, arguments, location);
 };
 
@@ -2227,7 +2234,7 @@ util.setItem = function(api, id, key, data, location) {
  *
  * @return the item.
  */
-util.getItem = function(api, id, key, location) {
+util.getItem = function (api, id, key, location) {
   return _callStorageFunction(_getItem, arguments, location);
 };
 
@@ -2241,7 +2248,7 @@ util.getItem = function(api, id, key, location) {
  * @param key the key for the item.
  * @param location an array with the preferred types of storage to use.
  */
-util.removeItem = function(api, id, key, location) {
+util.removeItem = function (api, id, key, location) {
   _callStorageFunction(_removeItem, arguments, location);
 };
 
@@ -2254,7 +2261,7 @@ util.removeItem = function(api, id, key, location) {
  * @param id the storage ID to use.
  * @param location an array with the preferred types of storage to use.
  */
-util.clearItems = function(api, id, location) {
+util.clearItems = function (api, id, location) {
   _callStorageFunction(_clearItems, arguments, location);
 };
 
@@ -2266,9 +2273,9 @@ util.clearItems = function(api, id, location) {
  *
  * @param object the object to check.
  */
-util.isEmpty = function(obj) {
-  for(var prop in obj) {
-    if(obj.hasOwnProperty(prop)) {
+util.isEmpty = function (obj) {
+  for (var prop in obj) {
+    if (obj.hasOwnProperty(prop)) {
       return false;
     }
   }
@@ -2284,7 +2291,7 @@ util.isEmpty = function(obj) {
  * @param format the string to format.
  * @param ... arguments to interpolate into the format string.
  */
-util.format = function(format) {
+util.format = function (format) {
   var re = /%./g;
   // current match
   var match;
@@ -2297,33 +2304,33 @@ util.format = function(format) {
   // last index found
   var last = 0;
   // loop while matches remain
-  while((match = re.exec(format))) {
+  while ((match = re.exec(format))) {
     part = format.substring(last, re.lastIndex - 2);
     // don't add empty strings (ie, parts between %s%s)
-    if(part.length > 0) {
+    if (part.length > 0) {
       parts.push(part);
     }
     last = re.lastIndex;
     // switch on % code
     var code = match[0][1];
-    switch(code) {
-    case 's':
-    case 'o':
-      // check if enough arguments were given
-      if(argi < arguments.length) {
-        parts.push(arguments[argi++ + 1]);
-      } else {
-        parts.push('<?>');
-      }
-      break;
-    // FIXME: do proper formating for numbers, etc
-    //case 'f':
-    //case 'd':
-    case '%':
-      parts.push('%');
-      break;
-    default:
-      parts.push('<%' + code + '?>');
+    switch (code) {
+      case 's':
+      case 'o':
+        // check if enough arguments were given
+        if (argi < arguments.length) {
+          parts.push(arguments[argi++ + 1]);
+        } else {
+          parts.push('<?>');
+        }
+        break;
+      // FIXME: do proper formating for numbers, etc
+      //case 'f':
+      //case 'd':
+      case '%':
+        parts.push('%');
+        break;
+      default:
+        parts.push('<%' + code + '?>');
     }
   }
   // add trailing part of format string
@@ -2336,7 +2343,7 @@ util.format = function(format) {
  *
  * http://snipplr.com/view/5945/javascript-numberformat--ported-from-php/
  */
-util.formatNumber = function(number, decimals, dec_point, thousands_sep) {
+util.formatNumber = function (number, decimals, dec_point, thousands_sep) {
   // http://kevin.vanzonneveld.net
   // +   original by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
   // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
@@ -2350,7 +2357,7 @@ util.formatNumber = function(number, decimals, dec_point, thousands_sep) {
   var n = number, c = isNaN(decimals = Math.abs(decimals)) ? 2 : decimals;
   var d = dec_point === undefined ? ',' : dec_point;
   var t = thousands_sep === undefined ?
-   '.' : thousands_sep, s = n < 0 ? '-' : '';
+    '.' : thousands_sep, s = n < 0 ? '-' : '';
   var i = parseInt((n = Math.abs(+n || 0).toFixed(c)), 10) + '';
   var j = (i.length > 3) ? i.length % 3 : 0;
   return s + (j ? i.substr(0, j) + t : '') +
@@ -2363,12 +2370,12 @@ util.formatNumber = function(number, decimals, dec_point, thousands_sep) {
  *
  * http://snipplr.com/view/5949/format-humanize-file-byte-size-presentation-in-javascript/
  */
-util.formatSize = function(size) {
-  if(size >= 1073741824) {
+util.formatSize = function (size) {
+  if (size >= 1073741824) {
     size = util.formatNumber(size / 1073741824, 2, '.', '') + ' GiB';
-  } else if(size >= 1048576) {
+  } else if (size >= 1048576) {
     size = util.formatNumber(size / 1048576, 2, '.', '') + ' MiB';
-  } else if(size >= 1024) {
+  } else if (size >= 1024) {
     size = util.formatNumber(size / 1024, 0) + ' KiB';
   } else {
     size = util.formatNumber(size, 0) + ' bytes';
@@ -2384,11 +2391,11 @@ util.formatSize = function(size) {
  * @return the 4-byte IPv6 or 16-byte IPv6 address or null if the address can't
  *         be parsed.
  */
-util.bytesFromIP = function(ip) {
-  if(ip.indexOf('.') !== -1) {
+util.bytesFromIP = function (ip) {
+  if (ip.indexOf('.') !== -1) {
     return util.bytesFromIPv4(ip);
   }
-  if(ip.indexOf(':') !== -1) {
+  if (ip.indexOf(':') !== -1) {
     return util.bytesFromIPv6(ip);
   }
   return null;
@@ -2401,15 +2408,15 @@ util.bytesFromIP = function(ip) {
  *
  * @return the 4-byte address or null if the address can't be parsed.
  */
-util.bytesFromIPv4 = function(ip) {
+util.bytesFromIPv4 = function (ip) {
   ip = ip.split('.');
-  if(ip.length !== 4) {
+  if (ip.length !== 4) {
     return null;
   }
   var b = util.createBuffer();
-  for(var i = 0; i < ip.length; ++i) {
+  for (var i = 0; i < ip.length; ++i) {
     var num = parseInt(ip[i], 10);
-    if(isNaN(num)) {
+    if (isNaN(num)) {
       return null;
     }
     b.putByte(num);
@@ -2424,22 +2431,22 @@ util.bytesFromIPv4 = function(ip) {
  *
  * @return the 16-byte address or null if the address can't be parsed.
  */
-util.bytesFromIPv6 = function(ip) {
+util.bytesFromIPv6 = function (ip) {
   var blanks = 0;
-  ip = ip.split(':').filter(function(e) {
-    if(e.length === 0) ++blanks;
+  ip = ip.split(':').filter(function (e) {
+    if (e.length === 0) ++blanks;
     return true;
   });
   var zeros = (8 - ip.length + blanks) * 2;
   var b = util.createBuffer();
-  for(var i = 0; i < 8; ++i) {
-    if(!ip[i] || ip[i].length === 0) {
+  for (var i = 0; i < 8; ++i) {
+    if (!ip[i] || ip[i].length === 0) {
       b.fillWithByte(0, zeros);
       zeros = 0;
       continue;
     }
     var bytes = util.hexToBytes(ip[i]);
-    if(bytes.length < 2) {
+    if (bytes.length < 2) {
       b.putByte(0);
     }
     b.putBytes(bytes);
@@ -2456,11 +2463,11 @@ util.bytesFromIPv6 = function(ip) {
  * @return the IPv4 or IPv6 string representation if 4 or 16 bytes,
  *         respectively, are given, otherwise null.
  */
-util.bytesToIP = function(bytes) {
-  if(bytes.length === 4) {
+util.bytesToIP = function (bytes) {
+  if (bytes.length === 4) {
     return util.bytesToIPv4(bytes);
   }
-  if(bytes.length === 16) {
+  if (bytes.length === 16) {
     return util.bytesToIPv6(bytes);
   }
   return null;
@@ -2474,12 +2481,12 @@ util.bytesToIP = function(bytes) {
  *
  * @return the IPv4 string representation or null for an invalid # of bytes.
  */
-util.bytesToIPv4 = function(bytes) {
-  if(bytes.length !== 4) {
+util.bytesToIPv4 = function (bytes) {
+  if (bytes.length !== 4) {
     return null;
   }
   var ip = [];
-  for(var i = 0; i < bytes.length; ++i) {
+  for (var i = 0; i < bytes.length; ++i) {
     ip.push(bytes.charCodeAt(i));
   }
   return ip.join('.');
@@ -2493,27 +2500,27 @@ util.bytesToIPv4 = function(bytes) {
  *
  * @return the IPv16 string representation or null for an invalid # of bytes.
  */
-util.bytesToIPv6 = function(bytes) {
-  if(bytes.length !== 16) {
+util.bytesToIPv6 = function (bytes) {
+  if (bytes.length !== 16) {
     return null;
   }
   var ip = [];
   var zeroGroups = [];
   var zeroMaxGroup = 0;
-  for(var i = 0; i < bytes.length; i += 2) {
+  for (var i = 0; i < bytes.length; i += 2) {
     var hex = util.bytesToHex(bytes[i] + bytes[i + 1]);
     // canonicalize zero representation
-    while(hex[0] === '0' && hex !== '0') {
+    while (hex[0] === '0' && hex !== '0') {
       hex = hex.substr(1);
     }
-    if(hex === '0') {
+    if (hex === '0') {
       var last = zeroGroups[zeroGroups.length - 1];
       var idx = ip.length;
-      if(!last || idx !== last.end + 1) {
-        zeroGroups.push({start: idx, end: idx});
+      if (!last || idx !== last.end + 1) {
+        zeroGroups.push({ start: idx, end: idx });
       } else {
         last.end = idx;
-        if((last.end - last.start) >
+        if ((last.end - last.start) >
           (zeroGroups[zeroMaxGroup].end - zeroGroups[zeroMaxGroup].start)) {
           zeroMaxGroup = zeroGroups.length - 1;
         }
@@ -2521,15 +2528,15 @@ util.bytesToIPv6 = function(bytes) {
     }
     ip.push(hex);
   }
-  if(zeroGroups.length > 0) {
+  if (zeroGroups.length > 0) {
     var group = zeroGroups[zeroMaxGroup];
     // only shorten group of length > 0
-    if(group.end - group.start > 0) {
+    if (group.end - group.start > 0) {
       ip.splice(group.start, group.end - group.start + 1, '');
-      if(group.start === 0) {
+      if (group.start === 0) {
         ip.unshift('');
       }
-      if(group.end === 7) {
+      if (group.end === 7) {
         ip.push('');
       }
     }
@@ -2546,27 +2553,27 @@ util.bytesToIPv6 = function(bytes) {
  *          update true to force an update (not use the cached value).
  * @param callback(err, max) called once the operation completes.
  */
-util.estimateCores = function(options, callback) {
-  if(typeof options === 'function') {
+util.estimateCores = function (options, callback) {
+  if (typeof options === 'function') {
     callback = options;
     options = {};
   }
   options = options || {};
-  if('cores' in util && !options.update) {
+  if ('cores' in util && !options.update) {
     return callback(null, util.cores);
   }
-  if(typeof navigator !== 'undefined' &&
+  if (typeof navigator !== 'undefined' &&
     'hardwareConcurrency' in navigator &&
     navigator.hardwareConcurrency > 0) {
     util.cores = navigator.hardwareConcurrency;
     return callback(null, util.cores);
   }
-  if(typeof Worker === 'undefined') {
+  if (typeof Worker === 'undefined') {
     // workers not available
     util.cores = 1;
     return callback(null, util.cores);
   }
-  if(typeof Blob === 'undefined') {
+  if (typeof Blob === 'undefined') {
     // can't estimate, default to 2
     util.cores = 2;
     return callback(null, util.cores);
@@ -2574,31 +2581,31 @@ util.estimateCores = function(options, callback) {
 
   // create worker concurrency estimation code as blob
   var blobUrl = URL.createObjectURL(new Blob(['(',
-    function() {
-      self.addEventListener('message', function(e) {
+    function () {
+      self.addEventListener('message', function (e) {
         // run worker for 4 ms
         var st = Date.now();
         var et = st + 4;
-        while(Date.now() < et);
-        self.postMessage({st: st, et: et});
+        while (Date.now() < et);
+        self.postMessage({ st: st, et: et });
       });
     }.toString(),
-  ')()'], {type: 'application/javascript'}));
+    ')()'], { type: 'application/javascript' }));
 
   // take 5 samples using 16 workers
   sample([], 5, 16);
 
   function sample(max, samples, numWorkers) {
-    if(samples === 0) {
+    if (samples === 0) {
       // get overlap average
-      var avg = Math.floor(max.reduce(function(avg, x) {
+      var avg = Math.floor(max.reduce(function (avg, x) {
         return avg + x;
       }, 0) / max.length);
       util.cores = Math.max(1, avg);
       URL.revokeObjectURL(blobUrl);
       return callback(null, util.cores);
     }
-    map(numWorkers, function(err, results) {
+    map(numWorkers, function (err, results) {
       max.push(reduce(numWorkers, results));
       sample(max, samples - 1, numWorkers);
     });
@@ -2607,12 +2614,12 @@ util.estimateCores = function(options, callback) {
   function map(numWorkers, callback) {
     var workers = [];
     var results = [];
-    for(var i = 0; i < numWorkers; ++i) {
+    for (var i = 0; i < numWorkers; ++i) {
       var worker = new Worker(blobUrl);
-      worker.addEventListener('message', function(e) {
+      worker.addEventListener('message', function (e) {
         results.push(e.data);
-        if(results.length === numWorkers) {
-          for(var i = 0; i < numWorkers; ++i) {
+        if (results.length === numWorkers) {
+          for (var i = 0; i < numWorkers; ++i) {
             workers[i].terminate();
           }
           callback(null, results);
@@ -2620,7 +2627,7 @@ util.estimateCores = function(options, callback) {
       });
       workers.push(worker);
     }
-    for(var i = 0; i < numWorkers; ++i) {
+    for (var i = 0; i < numWorkers; ++i) {
       workers[i].postMessage(i);
     }
   }
@@ -2628,15 +2635,15 @@ util.estimateCores = function(options, callback) {
   function reduce(numWorkers, results) {
     // find overlapping time windows
     var overlaps = [];
-    for(var n = 0; n < numWorkers; ++n) {
+    for (var n = 0; n < numWorkers; ++n) {
       var r1 = results[n];
       var overlap = overlaps[n] = [];
-      for(var i = 0; i < numWorkers; ++i) {
-        if(n === i) {
+      for (var i = 0; i < numWorkers; ++i) {
+        if (n === i) {
           continue;
         }
         var r2 = results[i];
-        if((r1.st > r2.st && r1.st < r2.et) ||
+        if ((r1.st > r2.st && r1.st < r2.et) ||
           (r2.st > r1.st && r2.st < r1.et)) {
           overlap.push(i);
         }
@@ -2645,7 +2652,7 @@ util.estimateCores = function(options, callback) {
     // get maximum overlaps ... don't include overlapping worker itself
     // as the main JS process was also being scheduled during the work and
     // would have to be subtracted from the estimate anyway
-    return overlaps.reduce(function(max, overlap) {
+    return overlaps.reduce(function (max, overlap) {
       return Math.max(max, overlap.length);
     }, 0);
   }

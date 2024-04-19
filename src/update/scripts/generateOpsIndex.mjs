@@ -33,8 +33,11 @@ const excludedOperations = [
 
     "YARARules.mjs",
 
+  
     "AddTextToImage.mjs",
+   
     "BlurImage.mjs",
+  
     "ContainImage.mjs",
     "ConvertImageFormat.mjs",
     "CoverImage.mjs",
@@ -59,6 +62,7 @@ const excludedOperations = [
 
     "GenerateQRCode.mjs",
     "ParseQRCode.mjs"
+  
 ]
 
 // Find all operation files
