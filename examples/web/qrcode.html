@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CyberChef-executor Example</title>
+</head>
+
+<body>
+    <script src="common.js"></script>
+    <script src="../../dist/main.js"></script>
+    <script>
+
+        let executor = new chef.Executor('Image', 'Generate QR Code')
+        let outImage = executor.run('hello', ['PNG', 5, 4, 'Medium'])
+        console.log(outImage)
+
+        executor = new chef.Executor('Image', 'Parse QR Code')
+        let outText = executor.run(outImage.output, [false])
+        outText.output.then(text => console.log(text))    
+    </script>
+</body>
+
+</html>

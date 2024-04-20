@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CyberChef-executor Example</title>
+</head>
+
+<body>
+    <script src="common.js"></script>
+    <script src="../../dist/main.js"></script>
+    <script>
+        (async function () {
+            let executor = new chef.Executor('Ciphers', 'Generate RSA Key Pair')
+            let encoded = await executor.run(['1024', 'PEM'])
+            console.log(encoded)
+        })()
+    </script>
+</body>
+
+</html>

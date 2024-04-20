@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CyberChef-executor Example</title>
+</head>
+<body>
+    <script src="common.js"></script>
+    <script src="../../dist/main.js"></script>
+    <script>   
+        
+        let executor = new chef.Executor('Compression', 'Gzip')  
+        let compressed = executor.run(stringToArrayBuffer('hello'), [
+            'Dynamic Huffman Coding', '', '', false])
+        console.log(compressed)
+        
+        executor = new chef.Executor('Compression', 'Gunzip')
+        let plain = executor.run(compressed.output)
+        console.log(plain)
+        console.log(arrayBufferToString(plain.output)) //hello
+
+     
+  
+    </script>
+</body>
+
+</html>

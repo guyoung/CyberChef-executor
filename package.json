@@ -65,9 +65,11 @@
     "escodegen": "^2.1.0",
     "esprima": "^4.0.1",
     "fernet": "^0.3.2",
+    "fetchapi-module": "^1.0.0",
     "flat": "^6.0.1",
     "geodesy": "^1.1.3",
     "highlight.js": "^11.9.0",
+    "isomorphic-fetch": "^3.0.0",
     "jimp": "^0.22.12",
     "js-crc": "^0.2.0",
     "js-sha3": "^0.9.3",
@@ -113,6 +115,6 @@
     "vm-browserify": "^1.1.2",
     "xpath": "^0.0.34",
     "xregexp": "^5.1.1",
-    "zlib-module-js": "^0.3.2"
+    "zlib-module-js": "^0.3.3"
   }
 }

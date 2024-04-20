@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>CyberChef-executor Example</title>
+</head>
+<body>
+    <script src="common.js"></script>
+    <script src="../../dist/main.js"></script>
+    <script> 
+
+        let executor = new chef.Executor('XOR')
+        let result =  executor.run(stringToArrayBuffer('hello'), [
+            {'option':'Hex','string':'12345'},'Standard',false])   
+        console.log(result)
+        console.log(arrayBufferToString(result.output))
+
+     
+  
+
+     
+  
+    </script>
+</body>
+
+</html>

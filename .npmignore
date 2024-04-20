@@ -3,3 +3,5 @@ npm-debug.log
 travis.log
 .vscode
 .github
+
+examples/output

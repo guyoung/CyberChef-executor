@@ -36,8 +36,8 @@ const excludedOperations = [
   
     "AddTextToImage.mjs",
    
-    "BlurImage.mjs",
-  
+    /*
+    "BlurImage.mjs",  
     "ContainImage.mjs",
     "ConvertImageFormat.mjs",
     "CoverImage.mjs",
@@ -62,6 +62,7 @@ const excludedOperations = [
 
     "GenerateQRCode.mjs",
     "ParseQRCode.mjs"
+    */
   
 ]
 

@@ -3,57 +3,24 @@
 
 <head>
     <meta charset="UTF-8" />
+    <title>CyberChef-executor Example</title>
 </head>
 <body>
+    <script src="common.js"></script>
     <script src="../../dist/main.js"></script>
-    <script> 
-        function stringToArrayBuffer(str) {
-            const encoder = new TextEncoder();
-            const uint8Array = encoder.encode(str);
-            return uint8Array.buffer;
-        }       
-        function arrayBufferToString(buffer) {
-            const decoder = new TextDecoder();
-            return decoder.decode(buffer);
-        }
-
+    <script>   
         console.log(chef.getOpCategories())
         console.log(chef.getOpConfigs())
 
-        let executor = new chef.Executor("To Base64");
-        let encoded =  executor.run(stringToArrayBuffer("hello"), ["A-Za-z0-9+/="])   
+        let executor = new chef.Executor('To Base64')
+        let encoded =  executor.run(stringToArrayBuffer('hello'), ['A-Za-z0-9+/='])   
         console.log(encoded)
 
-        executor = new chef.Executor("From Base64"); 
-        let plain =  executor.run(encoded.output, ["A-Za-z0-9+/="])   
-        console.log(plain)
-        
+        executor = new chef.Executor('From Base64'); 
+        let plain =  executor.run(encoded.output, ['A-Za-z0-9+/='])   
+        console.log(plain)    
    
-        executor = new chef.Executor("Compression", "Gzip");       
-        let compressed = executor.run(stringToArrayBuffer("hello"), [
-            "Dynamic Huffman Coding", "", "", false])
-        console.log(compressed)
-        
-        executor = new chef.Executor("Compression", "Gunzip")
-        plain = executor.run(compressed.output)
-        console.log(plain)
-        console.log(arrayBufferToString(plain.output)) //hello
-
-        executor = new chef.Executor("Ciphers", "Blowfish Encrypt")
-        let encrypted =  executor.run("hello", [
-            {'option':'Hex','string':'12345678'},
-            {'option':'Hex','string':'1234567812345678'},
-            'CBC','Raw','Hex'])
-        console.log(encrypted)
-
-
-        executor = new chef.Executor("Ciphers", "Blowfish Decrypt")
-        plain =  executor.run(encrypted.output, [
-            {'option':'Hex','string':'12345678'},
-            {'option':'Hex','string':'1234567812345678'},
-            'CBC','Hex','Raw'])
-        console.log(plain)
-  
+      
     </script>
 </body>
 
