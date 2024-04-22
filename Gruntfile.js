@@ -12,7 +12,8 @@ module.exports = function (grunt) {
     grunt.registerTask("build",
         "A persistent task which creates a development build whenever source files are modified.",
         ["clean:build", 
-        "clean:config",        
+        "clean:config",    
+        "copy:crypto",    
         "exec:generateConfig", 
         "webpack"]);
 
@@ -74,7 +75,7 @@ module.exports = function (grunt) {
                      
                     }),
                     new webpack.DefinePlugin({                       
-                        //"process.browser": "true"
+                        "process.browser": "true"
                     }),
                 ],
                 resolve: {
@@ -82,25 +83,25 @@ module.exports = function (grunt) {
                     alias: {
                         "zlibjs": path.resolve(__dirname,'node_modules/zlib-module-js'),
                         "isomorphic-fetch": path.resolve(__dirname,'node_modules/fetchapi-module'),
+                        "randombytes": path.resolve(__dirname,'node_modules/randombytes-adapter'),
+
+                        "jimp": path.resolve(__dirname,"node_modules/jimp/es"),
 
                         "chi-squared": path.resolve(__dirname,'src/update/chi-squared'),
                         "crypto-api": path.resolve(__dirname,'src/update/crypto-api'),
                         "node-forge": path.resolve(__dirname,'src/update/node-forge'),
                         "node-md6": path.resolve(__dirname,'src/update/node-md6'),
-                        "randombytes": path.resolve(__dirname,'src/update/randombytes'),
+                        
                         
                         // Setting resolve.alias to false will tell webpack to ignore a module.
                         "fs": false,
                         "child_process": false,
                         "net": false,
-                        "tls": false,    
-                         
+                        "tls": false,                             
                         "load-bmfont": false   
 
                     },
-                    fallback: {
-                              
-                       
+                    fallback: {         
                         "process": require.resolve('process/browser'),
                         "path": require.resolve("path/"),
                         "buffer": require.resolve("buffer/"),
@@ -110,13 +111,15 @@ module.exports = function (grunt) {
                         "zlib": require.resolve("browserify-zlib"),
                         "vm": require.resolve("vm-browserify"),
 
-                        "jimp": require.resolve("jimp/es"),
+                      
                                   
                     }
                 },
                 module: {
-                    // argon2-browser loads argon2.wasm by itself, so Webpack should not load it
-                    //noParse: /argon2\.wasm$/,
+                    /***
+                    argon2-browser loads argon2.wasm by itself, so Webpack should not load it
+                    noParse: /argon2\.wasm$/,
+                    ***/
                     rules: [
                         {
                             test: /\.m?js$/,
@@ -129,7 +132,7 @@ module.exports = function (grunt) {
                             type: "javascript/auto",
                             loader: "babel-loader"
                         },
-                        /*
+                        /***
                         {
                             test: /node-forge/,
                             loader: "imports-loader",
@@ -137,15 +140,16 @@ module.exports = function (grunt) {
                                 additionalCode: "var jQuery = false;"
                             }
                         },
-                        */
-                       /*
+                        ***/
+                       /***
                         {
                             // Load argon2.wasm as base64-encoded binary file expected by argon2-browser
                             test: /argon2\.wasm$/,
                             loader: "base64-loader",
                             type: "javascript/auto"
                         },
-                        */
+                        ***/
+                       /***
                         {
                             test: /\.(ico|eot|ttf|woff|woff2)$/,
                             type: "asset/resource",
@@ -174,6 +178,7 @@ module.exports = function (grunt) {
                             exclude: /web\/static/,
                             type: "asset/inline",
                         },
+                        ***/
                     ]
                 },
 
@@ -188,13 +193,17 @@ module.exports = function (grunt) {
         },
 
         copy: {
-            
+            crypto: {
+                expand: true,
+                cwd: 'src/update/crypto-api',
+                src: '**',               
+                dest: 'node_modules/crypto-api',
+              },
           
         },
 
 
         exec: {
-
 
             generateConfig: {
                 command: chainCommands([
@@ -206,6 +215,7 @@ module.exports = function (grunt) {
                 ]),
                 sync: true
             },
+            
 
             fixCryptoApiImports: {
                 command: function () {
@@ -218,6 +228,7 @@ module.exports = function (grunt) {
                 },
                 stdout: false
             },
+       
         }
 
     });

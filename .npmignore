@@ -1,7 +1,8 @@
-node_modules
-npm-debug.log
-travis.log
-.vscode
-.github
-
-examples/output
+**/*
+!/dist/**
+!/src/**
+!LICENSE
+!README.md
+!/examples/assets/**
+!/examples/node/**
+!/examples/web/**

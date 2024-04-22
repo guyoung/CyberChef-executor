@@ -10,12 +10,12 @@
     <script src="../../dist/main.js"></script>
     <script>   
         
-        let executor = new chef.Executor('Compression', 'Gzip')  
+        let executor = new chef.Executor('Gzip')  
         let compressed = executor.run(stringToArrayBuffer('hello'), [
             'Dynamic Huffman Coding', '', '', false])
         console.log(compressed)
         
-        executor = new chef.Executor('Compression', 'Gunzip')
+        executor = new chef.Executor('Gunzip')
         let plain = executor.run(compressed.output)
         console.log(plain)
         console.log(arrayBufferToString(plain.output)) //hello

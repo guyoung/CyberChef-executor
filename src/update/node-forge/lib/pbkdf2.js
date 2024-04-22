@@ -15,7 +15,11 @@ require('./util');
 var pkcs5 = forge.pkcs5 = forge.pkcs5 || {};
 
 var crypto;
-if(forge.util.isNodejs && !forge.options.usePureJavaScript) {
+if(
+  /***
+  forge.util.isNodejs && 
+  ***/
+  !forge.options.usePureJavaScript) {
   crypto = require('crypto');
 }
 
@@ -44,7 +48,11 @@ module.exports = forge.pbkdf2 = pkcs5.pbkdf2 = function(
 
   // use native implementation if possible and not disabled, note that
   // some node versions only support SHA-1, others allow digest to be changed
-  if(forge.util.isNodejs && !forge.options.usePureJavaScript &&
+  if(
+    /***
+    forge.util.isNodejs && 
+    ***/
+    !forge.options.usePureJavaScript &&
     crypto.pbkdf2 && (md === null || typeof md !== 'object') &&
     (crypto.pbkdf2Sync.length > 4 || (!md || md === 'sha1'))) {
     if(typeof md !== 'string') {

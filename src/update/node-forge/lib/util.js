@@ -112,10 +112,7 @@ util.isNodejs =
   typeof process !== 'undefined' && process.versions && process.versions.node;
 ***/
 
-/***{ modified by guyoung ***/
-util.isNodejs =
-  typeof module !== 'undefined' && module.exports
-/*** modified by guyoung }***/	
+
 
 
 // 'self' will also work in Web Workers (instance of WorkerGlobalScope) while
@@ -123,11 +120,25 @@ util.isNodejs =
 // To remain compatible with older browsers, we fall back to 'window' if 'self'
 // is not available.
 util.globalScope = (function () {
+  /***
   if (util.isNodejs) {
     return global;
   }
 
   return typeof self === 'undefined' ? window : self;
+  ***/
+  /***{ modified by guyoung ***/
+  return typeof globalThis !== 'undefined'
+    ? globalThis
+    : typeof self !== 'undefined'
+      ? self
+      : typeof window !== 'undefined'
+        ? window
+        : typeof global !== 'undefined'
+          ? global
+          : this;
+  /*** modified by guyoung }***/
+
 })();
 
 // define isArray

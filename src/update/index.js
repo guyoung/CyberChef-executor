@@ -50,8 +50,12 @@ Object.assign(
     ProtobufModule,
 );
 
-function getOperation(moduleName, opName) {
-    let module = OpModules[moduleName]
+function getOperation(opName) {
+    if (!OperationConfig[opName]) {
+        return null
+    }
+
+    let module = OpModules[OperationConfig[opName].module]
 
     if (!module) {
         return null
@@ -67,24 +71,12 @@ function getOperation(moduleName, opName) {
 
 class Executor {
 
-    constructor() {
-        if (arguments.length == 0) {
-            throw "Arguments error"
+    constructor(opName) {
+        if (!opName) {
+            throw "Operation name error"
         }
 
-        let moduleName = "Default"
-        let opName
-
-
-        if (arguments.length == 1) {
-            opName = arguments[0]
-        } else if (arguments.length >= 2) {
-            moduleName = arguments[0]
-            opName = arguments[1]
-        }
-
-
-        let op = getOperation(moduleName, opName)
+        let op = getOperation(opName)
 
         if (!op) {
             throw "Operation not exist"

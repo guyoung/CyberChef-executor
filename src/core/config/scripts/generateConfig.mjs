@@ -11,16 +11,10 @@
 
 /* eslint no-console: ["off"] */
 
-const self = global;
-
 import path from "path";
 import fs  from "fs";
 import process from "process";
 import * as Ops from "../../operations/index.mjs";
-
-console.log("Generate Config.");
-
-
 
 const dir = path.join(process.cwd() + "/src/core/config/");
 if (!fs.existsSync(dir)) {
@@ -57,7 +51,7 @@ for (const opObj in Ops) {
     modules[op.module][op.name] = opObj;
 }
 
-console.log("------------------------")
+
 /**
  * Write OperationConfig.
  */
@@ -67,7 +61,7 @@ fs.writeFileSync(
 );
 console.log("Written OperationConfig.json");
 
-console.log("------------------------")
+
 /**
  * Write modules.
  */

@@ -13,7 +13,11 @@ var forge = require('./forge');
 require('./util');
 
 var _crypto = null;
-if(forge.util.isNodejs && !forge.options.usePureJavaScript
+if(
+  /***
+  forge.util.isNodejs && 
+  ***/
+  !forge.options.usePureJavaScript
   /***
    &&
   !process.versions['node-webkit'] 

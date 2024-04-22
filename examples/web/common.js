@@ -6,11 +6,11 @@ function stringToArrayBuffer(input) {
 
 function arrayBufferToString(input) {
     const decoder = new TextDecoder()
-    if (Array.isArray(input)) {
+    if (isArray(input)) {
         let buffer = new Uint8Array(input).buffer
         return decoder.decode(buffer)
     }
-    if (Array.isTypedArray(input)) {
+    if (isTypedArray(input)) {
         let buffer = input.buffer
         return decoder.decode(buffer)
     }

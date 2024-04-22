@@ -1,5 +1,6 @@
 'use strict';
 
+/***{ modified by guyoung ***/
 import Has160 from "./hasher/has160.mjs";
 import Md2 from "./hasher/md2.mjs";
 import Md4 from "./hasher/md4.mjs";
@@ -16,6 +17,7 @@ import {fromArrayBuffer} from "./encoder/array-buffer.mjs";
 import {toHex} from "./encoder/hex.mjs";
 import {toBase64} from "./encoder/base64.mjs";
 import Hmac from "./mac/hmac.mjs";
+/*** modified by guyoung }***/	
 
 /**
  * Main class for ES5 compatibility.

@@ -1,4 +1,4 @@
-const chef = require("../../dist/main.js")
+const chef = require('../../dist/main.js')
 
 let executor = new chef.Executor('XOR')
 let result =  executor.run(Buffer.from('hello'), [

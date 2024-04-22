@@ -124,7 +124,11 @@ if(_crypto && _crypto.getRandomValues) {
 }
 
 if(forge.options.usePureJavaScript ||
-  (!forge.util.isNodejs && !getRandomValues)) {
+  (
+    /***
+    !forge.util.isNodejs && 
+    ***/
+    !getRandomValues)) {
   // if this is a web worker, do not use weak entropy, instead register to
   // receive strong entropy asynchronously from the main thread
   if(typeof window === 'undefined' || window.document === undefined) {

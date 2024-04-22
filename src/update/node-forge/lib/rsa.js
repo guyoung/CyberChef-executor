@@ -74,7 +74,13 @@ if(typeof BigInteger === 'undefined') {
   var BigInteger = forge.jsbn.BigInteger;
 }
 
+/***
 var _crypto = forge.util.isNodejs ? require('crypto') : null;
+***/
+/***{ modified by guyoung ***/
+var _crypto = require('crypto')
+/*** modified by guyoung }***/
+
 
 // shortcut for asn.1 API
 var asn1 = forge.asn1;
@@ -1877,7 +1883,8 @@ function _getMillerRabinTests(bits) {
  * @return true if detected, false if not.
  */
 function _detectNodeCrypto(fn) {
-  return forge.util.isNodejs && typeof _crypto[fn] === 'function';
+  return /***forge.util.isNodejs && ***/
+    typeof _crypto[fn] === 'function';
 }
 
 /**

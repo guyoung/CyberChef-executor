@@ -13,8 +13,6 @@ import path from "path";
 import fs  from "fs";
 import process from "process";
 
-console.log("Generate operation index.");
-
 const dir = path.join(process.cwd() + "/src/core/config/");
 if (!fs.existsSync(dir)) {
     console.log("\nCWD: " + process.cwd());
@@ -53,8 +51,6 @@ opObjs.forEach(obj => {
 });
 
 code += "};\n";
-
-console.log("------------------------")
 
 // Write file
 fs.writeFileSync(
