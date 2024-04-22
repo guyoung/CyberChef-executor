@@ -1,4 +1,4 @@
-const chef = require('../../dist/main.js')
+const chef = require('../../dist/main.min.js')
 
 
 
